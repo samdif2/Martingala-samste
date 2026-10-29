@@ -1,0 +1,6 @@
+{
+  "name": "Martingala Pro - Gestione Avanzata Scommesse",
+  "description": "Applicazione per la gestione avanzata di un sistema di scommesse a Martingala con calcolo dinamico delle puntate, value edge e sincronizzazione Supabase in tempo reale.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

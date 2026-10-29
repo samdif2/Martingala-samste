@@ -1,0 +1,2199 @@
+<!doctype html>
+<html lang="it" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Martingala Pro - Gestione Avanzata Scommesse</title>
+    <meta name="description" content="Applicazione per la gestione avanzata di un sistema di scommesse a Martingala con calcolo dinamico delle puntate, value edge e sincronizzazione Supabase in tempo reale." />
+    <meta property="og:title" content="Martingala Pro - Gestione Avanzata Scommesse" />
+    <meta property="og:description" content="Applicazione per la gestione avanzata di un sistema di scommesse a Martingala con calcolo dinamico delle puntate, value edge e sincronizzazione Supabase in tempo reale." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'monospace'],
+            },
+            colors: {
+              brand: {
+                dark: '#0b0f17',
+                card: '#111827',
+                border: '#1f2937',
+                accent: '#10b981',
+              }
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Supabase JS CDN (v2) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- jsPDF & AutoTable for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #0b0f17;
+        color: #f3f4f6;
+      }
+      .font-numeric {
+        font-family: 'JetBrains Mono', monospace;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0f172a;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #475569;
+      }
+      /* Smooth transitions */
+      button, input, select, textarea {
+        transition: all 0.15s ease-in-out;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- ROOT CONTAINER -->
+    <div id="app" class="flex-1 flex flex-col max-w-[1700px] w-full mx-auto px-3 sm:px-6 py-4 space-y-4">
+
+      <!-- ========================================== -->
+      <!-- 1. HEADER / HEADLINE (Home)               -->
+      <!-- ========================================== -->
+      <header class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xl backdrop-blur-md flex flex-wrap items-center justify-between gap-4">
+        <!-- Titolo & Status Connection -->
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 flex items-center justify-center shadow-lg shadow-emerald-500/20 border border-emerald-400/30">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+                MARTINGALA PRO
+              </h1>
+              <span id="supabaseStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-500/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Supabase Live</span>
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">Sistema di Scommesse a Quota Dinamica & Recupero Geometrico</p>
+          </div>
+        </div>
+
+        <!-- Cassa Attuale & Errori Residui KPI Cards -->
+        <div class="flex items-center flex-wrap gap-3">
+          <!-- Cassa Card -->
+          <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl px-4 py-2 flex items-center gap-3 shadow-inner">
+            <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="text-[11px] uppercase tracking-wider font-semibold text-slate-400">Cassa Attuale</div>
+              <div id="headerCassaDisplay" class="text-xl sm:text-2xl font-bold font-numeric text-emerald-400">100,00 €</div>
+            </div>
+          </div>
+
+          <!-- Errori Residui Card (Interactive calculation) -->
+          <div id="erroriResiduiCard" class="cursor-pointer group relative bg-slate-800/80 hover:bg-slate-800 border border-amber-500/30 hover:border-amber-500/60 rounded-xl px-4 py-2 flex items-center gap-3 shadow-inner transition">
+            <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-105 transition">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="text-[11px] uppercase tracking-wider font-semibold text-slate-400 flex items-center gap-1">
+                <span>Errori Residui</span>
+                <span class="text-amber-400 text-[10px]">(Simula)</span>
+              </div>
+              <div class="flex items-baseline gap-1.5">
+                <span id="headerErroriResidui" class="text-xl sm:text-2xl font-bold font-numeric text-amber-400">4</span>
+                <span class="text-xs text-slate-400">step sostenibili</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottoni Azione Header -->
+        <div class="flex items-center gap-2.5">
+          <!-- Tasto Elenco Partite -->
+          <button id="btnOpenMatchesModal" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-900/40 border border-emerald-400/30 transition transform active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            <span>Elenco Partite</span>
+            <span id="headerMatchesCountBadge" class="bg-black/30 text-white text-xs px-2 py-0.5 rounded-full font-mono">0</span>
+          </button>
+
+          <!-- Tasto Nuova Martingala -->
+          <button id="btnNewMartingale" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 font-semibold text-sm px-3.5 py-2.5 rounded-xl border border-amber-500/30 hover:border-amber-500/60 shadow-md transition transform active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span class="hidden sm:inline">Nuova Martingala</span>
+            <span class="sm:hidden">Reset</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ========================================== -->
+      <!-- 2. BARRA CONFIGURAZIONE (Home)             -->
+      <!-- ========================================== -->
+      <section class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-md">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+          
+          <!-- Regolazione Cassa Attuale -->
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+              Cassa Attuale (€)
+            </label>
+            <div class="flex items-center gap-1.5">
+              <button id="btnCassaMinus" title="Diminuisci cassa di 10€" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center border border-slate-700 text-base active:bg-slate-600 transition">
+                −
+              </button>
+              <input id="inputCassa" type="number" step="1" min="1" value="100.00" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-center font-numeric font-bold text-emerald-400 text-lg focus:outline-none focus:border-emerald-500">
+              <button id="btnCassaPlus" title="Aumenta cassa di 10€" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center border border-slate-700 text-base active:bg-slate-600 transition">
+                +
+              </button>
+            </div>
+          </div>
+
+          <!-- Regolazione % Ricavo Prevista -->
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                % Ricavo Prevista
+              </label>
+              <span class="text-[10px] text-slate-500">(step ±0.1%)</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button id="btnRevenueMinus" title="Diminuisci di 0.1%" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center border border-slate-700 text-base active:bg-slate-600 transition">
+                −
+              </button>
+              <div class="flex-1 bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-2 flex items-center justify-center">
+                <span id="displayRevenuePct" class="font-numeric font-bold text-cyan-400 text-lg">1.0%</span>
+              </div>
+              <button id="btnRevenuePlus" title="Aumenta di 0.1%" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center border border-slate-700 text-base active:bg-slate-600 transition">
+                +
+              </button>
+            </div>
+          </div>
+
+          <!-- Nome Martingala & Codice Database -->
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+              Nome Martingala & Codice
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <input id="inputMartingaleName" type="text" value="Ciclo Principale" placeholder="Nome ciclo" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+              <input id="inputDatabaseCode" type="text" value="MRT-01" placeholder="Codice DB" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-mono text-amber-300 focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+
+          <!-- Tasto Elenco Martingala (Cicli Passati) -->
+          <div class="flex flex-col justify-end">
+            <button id="btnOpenHistoryModal" class="w-full h-[58px] flex items-center justify-center gap-2.5 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 border border-slate-600 rounded-xl font-semibold text-sm text-slate-200 shadow-md transition active:scale-[0.98]">
+              <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>Elenco Martingala (Storico)</span>
+              <span id="historyCountBadge" class="bg-cyan-950 text-cyan-300 border border-cyan-800/40 text-xs px-2 py-0.5 rounded-full font-mono">0</span>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 3. TABELLA PRINCIPALE / MARTINGALA (Home)  -->
+      <!-- ========================================== -->
+      <section class="bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl backdrop-blur-md overflow-hidden flex flex-col flex-1">
+        
+        <!-- Barra Titolo Tabella con Bottoni PDF e COPIA -->
+        <div class="px-5 py-3.5 bg-slate-850/80 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <h2 class="text-base font-bold text-slate-100 flex items-center gap-2">
+              Tabella Martingala Attiva
+              <span class="text-xs font-normal text-slate-400 font-numeric">
+                (Ord. decrescente: nuova partita in cima)
+              </span>
+            </h2>
+          </div>
+
+          <!-- Riepilogo Rapido Perdita Accumulata & Pulsanti Esportazione -->
+          <div class="flex items-center flex-wrap gap-2.5">
+            <div class="text-xs bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+              <span class="text-slate-400">Perdita Accumulata:</span>
+              <span id="displayPerditaAccumulata" class="font-numeric font-bold text-rose-400">0,00 €</span>
+            </div>
+
+            <!-- Tasto PDF -->
+            <button id="btnExportPDF" class="flex items-center gap-1.5 bg-rose-600/90 hover:bg-rose-500 text-white font-semibold text-xs px-3 py-1.5 rounded-lg border border-rose-400/40 shadow-sm transition active:scale-95">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span>PDF</span>
+            </button>
+
+            <!-- Tasto COPIA Tabella TSV -->
+            <button id="btnCopyTableTSV" class="flex items-center gap-1.5 bg-indigo-600/90 hover:bg-indigo-500 text-white font-semibold text-xs px-3 py-1.5 rounded-lg border border-indigo-400/40 shadow-sm transition active:scale-95">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+              </svg>
+              <span>COPIA (TSV)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabella con Scroll Orizzontale Reattivo -->
+        <div class="overflow-x-auto flex-1">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-950/90 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-800 text-[11px]">
+                <th class="py-3 px-3 w-24">Data</th>
+                <th class="py-3 px-2 w-16 text-center">Ora</th>
+                <th class="py-3 px-3 min-w-[220px]">Partita</th>
+                <th class="py-3 px-2 w-14 text-center">Segno</th>
+                <th class="py-3 px-3 w-24 text-center">Probabilità</th>
+                <th class="py-3 px-3 w-32 text-center">Quota</th>
+                <th class="py-3 px-3 w-24 text-center">Value Edge</th>
+                <th class="py-3 px-3 w-28 text-center text-cyan-300">Puntata</th>
+                <th class="py-3 px-3 w-28 text-center">V / P</th>
+                <th class="py-3 px-3 w-28 text-right">Cassa</th>
+                <th class="py-3 px-3 w-24 text-right">Perdita</th>
+              </tr>
+            </thead>
+            <tbody id="martingaleTableBody" class="divide-y divide-slate-800/80">
+              <!-- La prima riga attiva e la cronologia congelata verranno renderizzate dinamicamente via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer / Guida Rapida Formule -->
+        <div class="bg-slate-950/60 px-5 py-2.5 border-t border-slate-800/80 text-[11px] text-slate-400 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-4 flex-wrap">
+            <span>Formula Puntata: <code class="text-cyan-300 font-mono font-bold">(Perdita Acc. + Profitto Ob.) / (Quota - 1)</code></span>
+            <span>Profitto Obiettivo: <code class="text-slate-300 font-mono">Cassa × (% Ricavo / 100)</code></span>
+            <span>Value Edge: <code class="text-slate-300 font-mono">((Quota × Prob/100) - 1) × 100</code></span>
+          </div>
+          <div class="text-slate-500 font-mono text-[10px]">
+            Sincronizzazione Cloud Supabase & Local Cache attiva
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 4. FINESTRA MODALE ELENCO PARTITE (Quasi a tutto schermo)       -->
+    <!-- ============================================================== -->
+    <div id="matchesModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+      <div class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-7xl h-[94vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
+        
+        <!-- Header Modale Elenco Partite -->
+        <div class="bg-slate-850 px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3 flex-wrap">
+          <!-- Torna alla Martingala -->
+          <button id="btnCloseMatchesModal" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-700 transition active:scale-95">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span>Torna alla Martingala</span>
+          </button>
+
+          <!-- Titolo & Legenda Colori Probabilità -->
+          <div class="flex items-center gap-3">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              Elenco Partite & Pronostici
+              <span id="modalMatchesBadge" class="bg-emerald-950 text-emerald-400 border border-emerald-700/50 text-xs px-2.5 py-0.5 rounded-full font-mono">0 partite</span>
+            </h3>
+          </div>
+
+          <!-- Switch Tabella / Testo & Aggiungi Partita -->
+          <div class="flex items-center gap-2.5">
+            <button id="btnNewMatchFormToggle" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3 py-2 rounded-xl shadow transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span>+ Nuova Partita</span>
+            </button>
+
+            <!-- Switch Tabella / Testo -->
+            <div class="inline-flex p-1 bg-slate-950 rounded-xl border border-slate-800">
+              <button id="btnViewTable" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow transition">
+                Tabella
+              </button>
+              <button id="btnViewText" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition">
+                Testo (TSV)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legenda Colori Squadre (Probabilità) -->
+        <div class="bg-slate-950/70 px-5 py-2 border-b border-slate-800/80 flex items-center gap-3 flex-wrap text-[11px] text-slate-400">
+          <span class="font-semibold text-slate-300">Colore Nomi Squadre (Probabilità):</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-400"></span> &lt; 62% (Grigio)</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-white"></span> 62% - 64% (Bianco)</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-400"></span> 64% - 66% (Giallo)</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> 66% - 68% (Azzurro)</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> &ge; 68% (Verde)</span>
+        </div>
+
+        <!-- Form Rapido Inserimento Nuova Partita (Collapsible) -->
+        <div id="newMatchFormContainer" class="hidden bg-slate-850 p-4 border-b border-slate-800">
+          <form id="newMatchForm" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 items-end">
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Data</label>
+              <input id="newMatchDate" type="date" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Ora</label>
+              <input id="newMatchTime" type="time" required value="20:45" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Segno</label>
+              <input id="newMatchSign" type="text" required placeholder="Es. 1, Over 1.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Probabilità %</label>
+              <input id="newMatchProb" type="number" step="0.1" min="1" max="100" required placeholder="65.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Squadra A - Squadra B</label>
+              <input id="newMatchTeams" type="text" required placeholder="Inter - Juventus" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Competizione</label>
+              <input id="newMatchComp" type="text" required placeholder="Serie A" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Quota</label>
+              <div class="flex gap-1.5">
+                <input id="newMatchOdds" type="number" step="0.01" min="1.01" required placeholder="1.62" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-numeric font-bold text-emerald-400">
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow">
+                  Aggiungi
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- CONTENUTO MODALE: TABELLA O TESTO -->
+        <div class="flex-1 overflow-hidden relative">
+
+          <!-- 1. VISTA TABELLA -->
+          <div id="matchesTableView" class="h-full overflow-y-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead class="sticky top-0 z-10 bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-800 text-[11px]">
+                <tr>
+                  <th class="py-3 px-3 w-28">Data</th>
+                  <th class="py-3 px-2 w-16 text-center">Ora</th>
+                  <th class="py-3 px-2 w-16 text-center">Segno</th>
+                  <th class="py-3 px-3 w-24 text-center">Probabilità %</th>
+                  <th class="py-3 px-4 min-w-[260px]">Squadra A - Squadra B</th>
+                  <th class="py-3 px-3 min-w-[160px] text-center">Competizione</th>
+                  <th class="py-3 px-3 w-24 text-center">Quota</th>
+                  <th class="py-3 px-3 w-28 text-center">Value Edge %</th>
+                  <th class="py-3 px-3 w-28 text-center">Azioni</th>
+                </tr>
+              </thead>
+              <tbody id="matchesTableBody" class="divide-y divide-slate-800/80">
+                <!-- Verrà popolato dinamicamente via JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 2. VISTA TESTO (TEXTAREA TSV) -->
+          <div id="matchesTextView" class="hidden h-full flex flex-col p-4 bg-slate-950">
+            <div class="flex items-center justify-between pb-3 text-xs text-slate-400">
+              <p>Formato colonne (separate da <code class="text-amber-400 font-bold font-mono">TAB reale</code>): Data | Ora | Segno | Probabilità% | Squadra A - Squadra B | Competizione | Quota | Value Edge% | Stato</p>
+              <div class="flex items-center gap-2">
+                <button id="btnCopyAllMatchesTSV" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 transition">
+                  <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                  </svg>
+                  <span>Copia Tutto TSV</span>
+                </button>
+                <button id="btnSaveMatchesFromText" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-1.5 rounded-lg shadow transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Aggiorna da Testo (Salva)</span>
+                </button>
+              </div>
+            </div>
+            <textarea id="matchesRawTextarea" spellcheck="false" class="flex-1 w-full bg-slate-900 text-slate-100 font-mono text-xs p-4 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500 leading-relaxed resize-none" placeholder="Data	Ora	Segno	Prob%	Partita	Competizione	Quota	Value Edge%"></textarea>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 5. MODALE ELENCO MARTINGALA (Storico Cicli Passati)            -->
+    <!-- ============================================================== -->
+    <div id="historyModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
+      <div class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
+        
+        <!-- Header -->
+        <div class="bg-slate-850 px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-white">Elenco Storico Martingala (Cicli Passati)</h3>
+              <p class="text-xs text-slate-400">Tutte le scommesse archiviate e congelate con esito definitivo</p>
+            </div>
+          </div>
+          <button id="btnCloseHistoryModal" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Metric KPI Cards Storico -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-950/70 border-b border-slate-800">
+          <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">Totale Giocate</div>
+            <div id="kpiHistoryTotal" class="text-lg font-bold font-numeric text-white">0</div>
+          </div>
+          <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] text-emerald-400 uppercase font-semibold">Vinte (V)</div>
+            <div id="kpiHistoryWins" class="text-lg font-bold font-numeric text-emerald-400">0</div>
+          </div>
+          <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] text-rose-400 uppercase font-semibold">Perse (P)</div>
+            <div id="kpiHistoryLosses" class="text-lg font-bold font-numeric text-rose-400">0</div>
+          </div>
+          <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] text-cyan-400 uppercase font-semibold">Strike Rate %</div>
+            <div id="kpiHistoryWinRate" class="text-lg font-bold font-numeric text-cyan-400">0.0%</div>
+          </div>
+        </div>
+
+        <!-- Tabella Storico -->
+        <div class="flex-1 overflow-y-auto p-4">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-800 text-[11px]">
+                <th class="py-2.5 px-3">Data/Ora</th>
+                <th class="py-2.5 px-3">Partita</th>
+                <th class="py-2.5 px-2 text-center">Segno</th>
+                <th class="py-2.5 px-2 text-center">Quota</th>
+                <th class="py-2.5 px-3 text-center">Puntata</th>
+                <th class="py-2.5 px-3 text-center">Esito</th>
+                <th class="py-2.5 px-3 text-right">Cassa Risultante</th>
+                <th class="py-2.5 px-3 text-right">Perdita Reg.</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody" class="divide-y divide-slate-800/80">
+              <!-- Righe Storico via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer Storico -->
+        <div class="bg-slate-850 px-5 py-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+          <button id="btnCopyHistoryTSV" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+            Copia Storico (TSV)
+          </button>
+          <span>Dati salvati e sincronizzati nella tabella <code class="text-cyan-400 font-mono">history</code></span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 6. MODALE SIMULAZIONE ERRORI RESIDUI                            -->
+    <!-- ============================================================== -->
+    <div id="simulationModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
+      <div class="bg-slate-900 border border-amber-500/40 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
+        <div class="bg-slate-850 px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-white">Simulazione Geometrica Errori Residui</h3>
+              <p class="text-xs text-slate-400">Analisi di sostenibilità bankroll prima del fallimento</p>
+            </div>
+          </div>
+          <button id="btnCloseSimulationModal" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">
+            ✕
+          </button>
+        </div>
+
+        <div class="p-5 overflow-y-auto space-y-4">
+          <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800 text-xs space-y-1.5 text-slate-300">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Cassa Base Analizzata:</span>
+              <span id="simCassaValue" class="font-numeric font-bold text-emerald-400">100,00 €</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Quota Base di Simulazione:</span>
+              <span id="simQuotaValue" class="font-numeric font-bold text-slate-200">1.60</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">% Ricavo Prevista:</span>
+              <span id="simRevenueValue" class="font-numeric font-bold text-cyan-400">1.0%</span>
+            </div>
+            <div class="flex justify-between border-t border-slate-800 pt-1.5">
+              <span class="text-slate-400">Capacità di Tolleranza Errori:</span>
+              <span id="simTotalErrors" class="font-numeric font-bold text-amber-400 text-sm">4 Errori Consecutivi</span>
+            </div>
+          </div>
+
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Tabella Step Progressivi di Perdita:</h4>
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-950 text-slate-400 font-semibold uppercase border-b border-slate-800 text-[10px]">
+                <th class="py-2 px-3 text-center">Step</th>
+                <th class="py-2 px-3 text-center text-cyan-300">Puntata Richiesta</th>
+                <th class="py-2 px-3 text-right text-rose-400">Perdita Cumulativa</th>
+                <th class="py-2 px-3 text-right text-emerald-400">Cassa Rimanente</th>
+              </tr>
+            </thead>
+            <tbody id="simTableBody" class="divide-y divide-slate-800/80">
+              <!-- Riempito via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 7. MODALE CONFERMA NUOVA MARTINGALA                            -->
+    <!-- ============================================================== -->
+    <div id="confirmResetModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-amber-500/50 rounded-2xl w-full max-w-md p-6 shadow-2xl text-center space-y-4 animate-fadeIn">
+        <div class="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto text-2xl">
+          ⚠️
+        </div>
+        <h3 class="text-lg font-bold text-white">Avviare Nuova Martingala?</h3>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Questa azione azzererà la tabella della Martingala attiva e la perdita accumulata.<br>
+          <strong class="text-emerald-400">L'Elenco Partite su Supabase rimarrà inalterato.</strong>
+        </p>
+        <div class="flex items-center justify-center gap-3 pt-2">
+          <button id="btnCancelReset" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+            Annulla
+          </button>
+          <button id="btnConfirmReset" class="px-5 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30 transition">
+            Sì, Conferma e Azzera
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 8. TOAST NOTIFICATION CONTAINER                                -->
+    <!-- ============================================================== -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ============================================================== -->
+    <!-- JAVASCRIPT VANILLA COMPLETO CON INTEGRAZIONE SUPABASE          -->
+    <!-- ============================================================== -->
+    <script>
+      // ==============================================================
+      // CONFIGURAZIONI RIGOROSE SPECIFICATE DALL'UTENTE
+      // ==============================================================
+      const SUPABASE_URL = 'https://pvsgajldayxlceqodecp.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_Fz8H-R1gmtCWfSwGz6JaWA_DuG6oWl-UuA';
+
+      // ==============================================================
+      // INIZIALIZZAZIONE CLIENT SUPABASE CON ROBUST FALLBACK
+      // ==============================================================
+      let supabase = null;
+      let isSupabaseConnected = false;
+
+      try {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: { persistSession: false }
+          });
+        }
+      } catch (e) {
+        console.warn('Inizializzazione Supabase fallita:', e);
+      }
+
+      // ==============================================================
+      // STATO DELL'APPLICAZIONE (SINGLE SOURCE OF TRUTH)
+      // ==============================================================
+      const APP_STATE = {
+        config: {
+          id: 'current_config',
+          name: 'Ciclo Principale',
+          code: 'MRT-01',
+          cassa: 100.00,
+          targetRevenuePct: 1.0,
+          perditaAccumulata: 0.00,
+          baseQuota: 1.60
+        },
+        // Riga attiva in alto non ancora congelata
+        activeRow: null,
+        // Storico delle righe congelate (chiuse da V/P)
+        history: [],
+        // Database elenco partite
+        matches: [],
+        // Modalità vista elenco partite: 'table' | 'text'
+        matchesViewMode: 'table'
+      };
+
+      // Dati predefiniti realistici per avvio immediato
+      const DEFAULT_SAMPLE_MATCHES = [
+        {
+          id: 'm1',
+          date: '2026-10-29',
+          time: '20:45',
+          sign: '1X',
+          probability: 72.5,
+          teams: 'Real Madrid - Girona',
+          competition: 'La Liga',
+          odds: 1.58,
+          in_gioco: false
+        },
+        {
+          id: 'm2',
+          date: '2026-10-29',
+          time: '21:00',
+          sign: 'Over 1.5',
+          probability: 67.2,
+          teams: 'Arsenal - Chelsea',
+          competition: 'Premier League',
+          odds: 1.62,
+          in_gioco: false
+        },
+        {
+          id: 'm3',
+          date: '2026-10-30',
+          time: '18:30',
+          sign: '1',
+          probability: 65.0,
+          teams: 'Inter - Fiorentina',
+          competition: 'Serie A',
+          odds: 1.65,
+          in_gioco: false
+        },
+        {
+          id: 'm4',
+          date: '2026-10-30',
+          time: '20:45',
+          sign: '1X',
+          probability: 63.4,
+          teams: 'Bayern Monaco - Lipsia',
+          competition: 'Bundesliga',
+          odds: 1.60,
+          in_gioco: false
+        },
+        {
+          id: 'm5',
+          date: '2026-10-31',
+          time: '18:00',
+          sign: 'Under 3.5',
+          probability: 61.0,
+          teams: 'Juventus - Milan',
+          competition: 'Serie A',
+          odds: 1.55,
+          in_gioco: false
+        }
+      ];
+
+      // ==============================================================
+      // FUNZIONI UTILITY FORMATTAZIONE & CALCOLO
+      // ==============================================================
+      function formatCurrency(val) {
+        const num = Number(val) || 0;
+        return num.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+      }
+
+      function formatNumber(val, decimals = 2) {
+        const num = Number(val) || 0;
+        return num.toFixed(decimals);
+      }
+
+      function calculateValueEdge(odds, probability) {
+        const q = Number(odds) || 1.0;
+        const p = Number(probability) || 0;
+        // Value Edge % = ((Quota * (Prob / 100)) - 1) * 100
+        return ((q * (p / 100)) - 1) * 100;
+      }
+
+      function calculatePuntata(cassa, targetPct, perditaAccumulata, odds) {
+        const q = Number(odds) || 1.60;
+        if (q <= 1.0) return 0;
+        const profittoObiettivo = (Number(cassa) || 0) * ((Number(targetPct) || 1.0) / 100);
+        const loss = Number(perditaAccumulata) || 0;
+        // Formula: Puntata = (Perdita accumulata + Profitto Obiettivo) / (Quota - 1)
+        const puntata = (loss + profittoObiettivo) / (q - 1);
+        return Math.max(0.10, Math.round(puntata * 100) / 100);
+      }
+
+      /**
+       * Calcolo geometrico dinamico degli Errori Residui
+       * Mostra quanti step di martingala fallimentari sono possibili prima di rimanere senza fondi.
+       * Simulazione: Cassa, quota base (1.60 o attiva), perdita attuale, % ricavo
+       */
+      function calculateErroriResidui(cassa, perditaAcc, targetPct, testQuota = 1.60) {
+        let remCassa = Number(cassa) || 0;
+        let accLoss = Number(perditaAcc) || 0;
+        let steps = 0;
+        const q = Math.max(1.05, Number(testQuota) || 1.60);
+        const details = [];
+
+        for (let i = 0; i < 40; i++) {
+          const profitGoal = remCassa * (Number(targetPct) / 100);
+          const bet = (accLoss + profitGoal) / (q - 1);
+          const roundedBet = Math.round(bet * 100) / 100;
+
+          if (roundedBet <= 0 || roundedBet > remCassa) {
+            break;
+          }
+
+          steps++;
+          remCassa = Math.round((remCassa - roundedBet) * 100) / 100;
+          accLoss = Math.round((accLoss + roundedBet) * 100) / 100;
+
+          details.push({
+            step: steps,
+            bet: roundedBet,
+            remaining: remCassa,
+            accumulatedLoss: accLoss
+          });
+        }
+
+        return {
+          steps,
+          details
+        };
+      }
+
+      /**
+       * Colore del testo Squadre in base alla probabilità:
+       * < 62%: Grigio
+       * > 62% e < 64%: Bianco
+       * > 64% e < 66%: Giallo
+       * > 66% e < 68%: Azzurro
+       * >= 68%: Verde
+       */
+      function getProbabilityColorClass(prob) {
+        const p = Number(prob) || 0;
+        if (p < 62) return 'text-slate-400 font-normal';
+        if (p < 64) return 'text-white font-medium';
+        if (p < 66) return 'text-yellow-400 font-semibold';
+        if (p < 68) return 'text-cyan-400 font-semibold';
+        return 'text-emerald-400 font-bold';
+      }
+
+      // ==============================================================
+      // SISTEMA TOAST NOTIFICHE
+      // ==============================================================
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `px-4 py-2.5 rounded-xl text-xs font-semibold shadow-2xl flex items-center gap-2 border transition transform duration-200 translate-y-2 opacity-0 pointer-events-auto ${
+          type === 'success' 
+            ? 'bg-emerald-950/95 text-emerald-200 border-emerald-500/50 shadow-emerald-950/50' 
+            : type === 'warning'
+            ? 'bg-amber-950/95 text-amber-200 border-amber-500/50 shadow-amber-950/50'
+            : type === 'error'
+            ? 'bg-rose-950/95 text-rose-200 border-rose-500/50 shadow-rose-950/50'
+            : 'bg-slate-900/95 text-cyan-200 border-cyan-500/40 shadow-slate-950/50'
+        }`;
+
+        toast.innerHTML = `
+          <span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span>
+          <span>${message}</span>
+        `;
+
+        container.appendChild(toast);
+
+        // Anima ingresso
+        requestAnimationFrame(() => {
+          toast.classList.remove('translate-y-2', 'opacity-0');
+        });
+
+        // Rimozione automatica dopo 3s
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-y-2');
+          setTimeout(() => toast.remove(), 250);
+        }, 3000);
+      }
+
+      // ==============================================================
+      // SINCRONIZZAZIONE PERSISTENZA: LOCALSTORAGE + SUPABASE
+      // ==============================================================
+      const LOCAL_KEY = 'MARTINGALA_PRO_STORAGE_V1';
+
+      function saveLocalBackup() {
+        try {
+          localStorage.setItem(LOCAL_KEY, JSON.stringify({
+            config: APP_STATE.config,
+            activeRow: APP_STATE.activeRow,
+            history: APP_STATE.history,
+            matches: APP_STATE.matches
+          }));
+        } catch (e) {
+          console.error('Errore salvataggio localStorage:', e);
+        }
+      }
+
+      function loadLocalBackup() {
+        try {
+          const raw = localStorage.getItem(LOCAL_KEY);
+          if (raw) {
+            const data = JSON.parse(raw);
+            if (data.config) Object.assign(APP_STATE.config, data.config);
+            if (data.activeRow !== undefined) APP_STATE.activeRow = data.activeRow;
+            if (Array.isArray(data.history)) APP_STATE.history = data.history;
+            if (Array.isArray(data.matches) && data.matches.length > 0) {
+              APP_STATE.matches = data.matches;
+            } else {
+              APP_STATE.matches = [...DEFAULT_SAMPLE_MATCHES];
+            }
+            return true;
+          }
+        } catch (e) {
+          console.warn('Errore lettura localStorage:', e);
+        }
+        APP_STATE.matches = [...DEFAULT_SAMPLE_MATCHES];
+        return false;
+      }
+
+      // Sincronizzazione Configurazione con Supabase
+      async function syncConfigToSupabase() {
+        saveLocalBackup();
+        if (!supabase) return;
+
+        try {
+          const { error } = await supabase
+            .from('config')
+            .upsert({
+              id: APP_STATE.config.id,
+              name: APP_STATE.config.name,
+              code: APP_STATE.config.code,
+              cassa: APP_STATE.config.cassa,
+              target_revenue_pct: APP_STATE.config.targetRevenuePct,
+              perdita_accumulata: APP_STATE.config.perditaAccumulata,
+              updated_at: new Date().toISOString()
+            });
+
+          if (error) {
+            console.warn('Supabase config sync warn:', error.message);
+          } else {
+            isSupabaseConnected = true;
+            updateConnectionBadge(true);
+          }
+        } catch (err) {
+          console.warn('Supabase error:', err);
+        }
+      }
+
+      // Sincronizzazione Inserimento / Aggiornamento Partita con Supabase
+      async function syncMatchToSupabase(match) {
+        saveLocalBackup();
+        if (!supabase) return;
+
+        try {
+          const { error } = await supabase
+            .from('matches')
+            .upsert({
+              id: match.id,
+              date: match.date,
+              time: match.time,
+              sign: match.sign,
+              probability: match.probability,
+              teams: match.teams,
+              competition: match.competition,
+              odds: match.odds,
+              in_gioco: Boolean(match.in_gioco),
+              created_at: new Date().toISOString()
+            });
+
+          if (error) console.warn('Supabase match sync warn:', error.message);
+        } catch (err) {
+          console.warn('Supabase match sync err:', err);
+        }
+      }
+
+      // Sincronizzazione Cancellazione Partita da Supabase
+      async function deleteMatchFromSupabase(id) {
+        saveLocalBackup();
+        if (!supabase) return;
+
+        try {
+          const { error } = await supabase
+            .from('matches')
+            .delete()
+            .eq('id', id);
+
+          if (error) console.warn('Supabase delete match warn:', error.message);
+        } catch (err) {
+          console.warn('Supabase delete match err:', err);
+        }
+      }
+
+      // Sincronizzazione History (Riga Congelata) con Supabase
+      async function syncHistoryItemToSupabase(item) {
+        saveLocalBackup();
+        if (!supabase) return;
+
+        try {
+          const { error } = await supabase
+            .from('history')
+            .insert({
+              id: item.id,
+              martingale_code: APP_STATE.config.code,
+              date: item.date,
+              time: item.time,
+              match: item.match,
+              sign: item.sign,
+              probability: item.probability,
+              odds: item.odds,
+              value_edge: item.valueEdge,
+              puntata: item.puntata,
+              outcome: item.outcome,
+              cassa: item.cassa,
+              perdita: item.perdita,
+              created_at: item.timestamp || new Date().toISOString()
+            });
+
+          if (error) console.warn('Supabase history sync warn:', error.message);
+        } catch (err) {
+          console.warn('Supabase history err:', err);
+        }
+      }
+
+      // Sincronizzazione Cancellazione Ultimo Record History
+      async function deleteHistoryItemFromSupabase(id) {
+        saveLocalBackup();
+        if (!supabase) return;
+
+        try {
+          const { error } = await supabase
+            .from('history')
+            .delete()
+            .eq('id', id);
+
+          if (error) console.warn('Supabase history delete warn:', error.message);
+        } catch (err) {
+          console.warn('Supabase history delete err:', err);
+        }
+      }
+
+      // Caricamento Iniziale Dati da Supabase
+      async function fetchSupabaseData() {
+        if (!supabase) {
+          updateConnectionBadge(false);
+          return;
+        }
+
+        try {
+          // 1. Carica Config
+          const { data: configData, error: configErr } = await supabase
+            .from('config')
+            .select('*')
+            .limit(1)
+            .maybeSingle();
+
+          if (!configErr && configData) {
+            APP_STATE.config.name = configData.name || APP_STATE.config.name;
+            APP_STATE.config.code = configData.code || APP_STATE.config.code;
+            if (configData.cassa !== undefined) APP_STATE.config.cassa = Number(configData.cassa);
+            if (configData.target_revenue_pct !== undefined) APP_STATE.config.targetRevenuePct = Number(configData.target_revenue_pct);
+            if (configData.perdita_accumulata !== undefined) APP_STATE.config.perditaAccumulata = Number(configData.perdita_accumulata);
+            isSupabaseConnected = true;
+          }
+
+          // 2. Carica Matches
+          const { data: matchesData, error: matchesErr } = await supabase
+            .from('matches')
+            .select('*')
+            .order('date', { ascending: true });
+
+          if (!matchesErr && Array.isArray(matchesData) && matchesData.length > 0) {
+            APP_STATE.matches = matchesData.map(m => ({
+              id: m.id || 'm_' + Math.random().toString(36).substr(2, 9),
+              date: m.date || '2026-10-29',
+              time: m.time || '20:45',
+              sign: m.sign || '1',
+              probability: Number(m.probability) || 60,
+              teams: m.teams || m.match || 'Partita',
+              competition: m.competition || 'Campionato',
+              odds: Number(m.odds) || 1.60,
+              in_gioco: Boolean(m.in_gioco)
+            }));
+            isSupabaseConnected = true;
+          }
+
+          // 3. Carica History
+          const { data: historyData, error: historyErr } = await supabase
+            .from('history')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (!historyErr && Array.isArray(historyData)) {
+            APP_STATE.history = historyData.map(h => ({
+              id: h.id,
+              date: h.date,
+              time: h.time,
+              match: h.match,
+              sign: h.sign,
+              probability: Number(h.probability),
+              odds: Number(h.odds),
+              valueEdge: Number(h.value_edge),
+              puntata: Number(h.puntata),
+              outcome: h.outcome,
+              cassa: Number(h.cassa),
+              perdita: Number(h.perdita),
+              timestamp: h.created_at
+            }));
+            isSupabaseConnected = true;
+          }
+
+          updateConnectionBadge(isSupabaseConnected);
+          renderAll();
+        } catch (err) {
+          console.warn('Caricamento Supabase:', err);
+          updateConnectionBadge(false);
+        }
+      }
+
+      function updateConnectionBadge(online) {
+        const badge = document.getElementById('supabaseStatusBadge');
+        if (!badge) return;
+        if (online) {
+          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-500/30';
+          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Supabase Live</span>';
+        } else {
+          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-cyan-950/80 text-cyan-300 border border-cyan-500/30';
+          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span><span>Locale & Cloud Ready</span>';
+        }
+      }
+
+      // ==============================================================
+      // RENDERIZZAZIONE COMPONENTI UI
+      // ==============================================================
+
+      function renderHeader() {
+        document.getElementById('headerCassaDisplay').textContent = formatCurrency(APP_STATE.config.cassa);
+
+        // Calcola quota per la simulazione (usa la quota della riga attiva se presente, altrimenti base 1.60)
+        const currentQuota = APP_STATE.activeRow ? APP_STATE.activeRow.odds : APP_STATE.config.baseQuota;
+        const sim = calculateErroriResidui(
+          APP_STATE.config.cassa,
+          APP_STATE.config.perditaAccumulata,
+          APP_STATE.config.targetRevenuePct,
+          currentQuota
+        );
+
+        document.getElementById('headerErroriResidui').textContent = sim.steps;
+        document.getElementById('headerMatchesCountBadge').textContent = APP_STATE.matches.length;
+        document.getElementById('historyCountBadge').textContent = APP_STATE.history.length;
+      }
+
+      function renderConfigBar() {
+        document.getElementById('inputCassa').value = APP_STATE.config.cassa.toFixed(2);
+        document.getElementById('displayRevenuePct').textContent = APP_STATE.config.targetRevenuePct.toFixed(1) + '%';
+        document.getElementById('inputMartingaleName').value = APP_STATE.config.name;
+        document.getElementById('inputDatabaseCode').value = APP_STATE.config.code;
+        document.getElementById('displayPerditaAccumulata').textContent = formatCurrency(APP_STATE.config.perditaAccumulata);
+      }
+
+      /**
+       * 3. RENDER TABELLA PRINCIPALE / MARTINGALA (Home)
+       * Ordinamento discendente per Data e Ora.
+       * La prima riga in alto è la riga attiva per la partita successiva.
+       * Subito sotto ci sono le partite congelate nello storico.
+       */
+      function renderMartingaleTable() {
+        const tbody = document.getElementById('martingaleTableBody');
+        tbody.innerHTML = '';
+
+        // -------------------------------------------------------------
+        // PRIMA RIGA ATTIVA (IN CIMA)
+        // -------------------------------------------------------------
+        const trActive = document.createElement('tr');
+        trActive.className = 'bg-slate-900/90 border-b border-emerald-500/30 hover:bg-slate-850/80 transition';
+
+        const row = APP_STATE.activeRow;
+        const currentQuota = row ? row.odds : 1.60;
+        const prob = row ? row.probability : 65.0;
+        const valueEdge = calculateValueEdge(currentQuota, prob);
+        const puntata = calculatePuntata(
+          APP_STATE.config.cassa,
+          APP_STATE.config.targetRevenuePct,
+          APP_STATE.config.perditaAccumulata,
+          currentQuota
+        );
+
+        const dateVal = row ? row.date : new Date().toISOString().split('T')[0];
+        const timeVal = row ? row.time : '20:45';
+        const signVal = row ? row.sign : '1';
+        const teamsVal = row ? row.teams : '';
+
+        trActive.innerHTML = `
+          <!-- Data -->
+          <td class="py-3 px-3 font-numeric text-slate-300 whitespace-nowrap">
+            <span class="inline-block bg-slate-800/80 text-emerald-300 font-bold px-2 py-0.5 rounded text-[11px] border border-emerald-500/20">
+              ${dateVal}
+            </span>
+          </td>
+
+          <!-- Ora -->
+          <td class="py-3 px-2 font-numeric text-slate-300 text-center whitespace-nowrap">
+            ${timeVal}
+          </td>
+
+          <!-- Partita con tasto + (apri elenco) a sinistra e tasto X a destra -->
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-1.5 min-w-[220px]">
+              <button onclick="openMatchesModal()" title="Seleziona partita dall'Elenco" class="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center shadow-md transition active:scale-90 flex-shrink-0">
+                +
+              </button>
+              
+              <div class="flex-1 bg-slate-950/80 border ${row ? 'border-emerald-500/40 text-white' : 'border-dashed border-slate-700 text-slate-400'} px-2.5 py-1.5 rounded-lg text-xs truncate">
+                ${teamsVal ? `<span class="${getProbabilityColorClass(prob)}">${teamsVal}</span>` : '<span class="text-slate-500 italic">Clicca + per scegliere la partita...</span>'}
+              </div>
+
+              ${teamsVal ? `
+                <button onclick="removeActiveMatch()" title="Rimuovi partita attiva" class="w-7 h-7 rounded-lg bg-rose-950 hover:bg-rose-900 text-rose-300 font-bold flex items-center justify-center border border-rose-800/40 transition active:scale-90 flex-shrink-0">
+                  ✕
+                </button>
+              ` : ''}
+            </div>
+          </td>
+
+          <!-- Segno -->
+          <td class="py-3 px-2 text-center">
+            <span class="font-numeric font-bold bg-slate-800 text-cyan-300 px-2 py-0.5 rounded border border-slate-700">
+              ${signVal}
+            </span>
+          </td>
+
+          <!-- Probabilità -->
+          <td class="py-3 px-3 text-center font-numeric font-semibold ${getProbabilityColorClass(prob)}">
+            ${prob.toFixed(1)}%
+          </td>
+
+          <!-- Quota con tasti - e + (step 0.01) -->
+          <td class="py-3 px-3 text-center">
+            <div class="inline-flex items-center gap-1 bg-slate-950 border border-slate-700/80 rounded-lg p-0.5">
+              <button onclick="adjustActiveOdds(-0.01)" title="Diminuisci quota di 0.01" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center text-xs transition">
+                −
+              </button>
+              <span class="w-12 text-center font-numeric font-bold text-amber-400 text-xs">
+                ${currentQuota.toFixed(2)}
+              </span>
+              <button onclick="adjustActiveOdds(0.01)" title="Aumenta quota di 0.01" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center text-xs transition">
+                +
+              </button>
+            </div>
+          </td>
+
+          <!-- Value Edge -->
+          <td class="py-3 px-3 text-center font-numeric font-bold ${valueEdge >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+            ${valueEdge >= 0 ? '+' : ''}${valueEdge.toFixed(2)}%
+          </td>
+
+          <!-- Puntata -->
+          <td class="py-3 px-3 text-center font-numeric font-bold text-cyan-300 text-sm">
+            ${formatCurrency(puntata)}
+          </td>
+
+          <!-- Pulsanti V / P -->
+          <td class="py-3 px-3 text-center whitespace-nowrap">
+            <div class="inline-flex items-center gap-1.5">
+              <button onclick="handleActiveOutcome('V')" title="Esito Vinto" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-900/30 transition active:scale-95">
+                V
+              </button>
+              <button onclick="handleActiveOutcome('P')" title="Esito Perso" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-900/30 transition active:scale-95">
+                P
+              </button>
+            </div>
+          </td>
+
+          <!-- Cassa Corrente -->
+          <td class="py-3 px-3 text-right font-numeric font-semibold text-slate-300">
+            ${formatCurrency(APP_STATE.config.cassa)}
+          </td>
+
+          <!-- Perdita Progressiva -->
+          <td class="py-3 px-3 text-right font-numeric font-bold text-rose-400">
+            ${formatCurrency(APP_STATE.config.perditaAccumulata)}
+          </td>
+        `;
+
+        tbody.appendChild(trActive);
+
+        // -------------------------------------------------------------
+        // RIGHE CONGELATE (STORICO) ORDINATE DISCENDENTI
+        // -------------------------------------------------------------
+        APP_STATE.history.forEach((item, index) => {
+          const isLatestHistory = index === 0;
+          const trHistory = document.createElement('tr');
+          trHistory.className = 'bg-slate-950/60 hover:bg-slate-900/60 transition border-b border-slate-800/60 opacity-90';
+
+          trHistory.innerHTML = `
+            <!-- Data -->
+            <td class="py-2.5 px-3 font-numeric text-slate-400 whitespace-nowrap">
+              ${item.date}
+            </td>
+
+            <!-- Ora -->
+            <td class="py-2.5 px-2 font-numeric text-slate-400 text-center whitespace-nowrap">
+              ${item.time}
+            </td>
+
+            <!-- Partita Congelata -->
+            <td class="py-2.5 px-3">
+              <span class="${getProbabilityColorClass(item.probability)}">${item.match}</span>
+            </td>
+
+            <!-- Segno -->
+            <td class="py-2.5 px-2 text-center">
+              <span class="font-numeric text-slate-300 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">
+                ${item.sign}
+              </span>
+            </td>
+
+            <!-- Probabilità -->
+            <td class="py-2.5 px-3 text-center font-numeric text-slate-400">
+              ${item.probability.toFixed(1)}%
+            </td>
+
+            <!-- Quota -->
+            <td class="py-2.5 px-3 text-center font-numeric font-semibold text-amber-300/90">
+              ${item.odds.toFixed(2)}
+            </td>
+
+            <!-- Value Edge -->
+            <td class="py-2.5 px-3 text-center font-numeric ${item.valueEdge >= 0 ? 'text-emerald-400/90' : 'text-rose-400/90'}">
+              ${item.valueEdge >= 0 ? '+' : ''}${item.valueEdge.toFixed(2)}%
+            </td>
+
+            <!-- Puntata -->
+            <td class="py-2.5 px-3 text-center font-numeric font-semibold text-cyan-200/90">
+              ${formatCurrency(item.puntata)}
+            </td>
+
+            <!-- V / P Esito Congelato con Tasto X di annullamento sull'ultima -->
+            <td class="py-2.5 px-3 text-center whitespace-nowrap">
+              <div class="inline-flex items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded text-xs font-bold ${
+                  item.outcome === 'V'
+                    ? 'bg-emerald-600 text-white shadow shadow-emerald-950'
+                    : 'bg-rose-600 text-white shadow shadow-rose-950'
+                }">
+                  ${item.outcome === 'V' ? 'Vinta' : 'Persa'}
+                </span>
+
+                ${isLatestHistory ? `
+                  <button onclick="undoLatestHistoryOutcome()" title="Annulla esito e riapri partita" class="w-6 h-6 rounded bg-slate-800 hover:bg-rose-950 text-slate-400 hover:text-rose-300 flex items-center justify-center text-xs border border-slate-700 transition">
+                    ✕
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+
+            <!-- Cassa Registrata -->
+            <td class="py-2.5 px-3 text-right font-numeric font-bold ${item.outcome === 'V' ? 'text-emerald-400' : 'text-slate-300'}">
+              ${formatCurrency(item.cassa)}
+            </td>
+
+            <!-- Perdita Registrata -->
+            <td class="py-2.5 px-3 text-right font-numeric font-bold ${item.perdita > 0 ? 'text-rose-400' : 'text-slate-500'}">
+              ${formatCurrency(item.perdita)}
+            </td>
+          `;
+
+          tbody.appendChild(trHistory);
+        });
+      }
+
+      /**
+       * 4. RENDER ELENCO PARTITE (MODALE)
+       */
+      function renderMatchesModal() {
+        document.getElementById('modalMatchesBadge').textContent = `${APP_STATE.matches.length} partite`;
+
+        // Vista Tabella
+        const tbody = document.getElementById('matchesTableBody');
+        tbody.innerHTML = '';
+
+        APP_STATE.matches.forEach((m) => {
+          const valueEdge = calculateValueEdge(m.odds, m.probability);
+          const tr = document.createElement('tr');
+          tr.className = `border-b border-slate-800/80 hover:bg-slate-850/60 transition ${m.in_gioco ? 'bg-red-950/20' : ''}`;
+
+          tr.innerHTML = `
+            <!-- Data con tasto verde + per inserimento in Martingala -->
+            <td class="py-3 px-3 whitespace-nowrap">
+              <div class="flex items-center gap-2">
+                <button onclick="selectMatchForMartingale('${m.id}')" title="Inserisci nella Martingala" class="w-6 h-6 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center text-xs shadow transition active:scale-90 flex-shrink-0">
+                  +
+                </button>
+                <span class="font-numeric text-slate-300">${m.date}</span>
+              </div>
+            </td>
+
+            <!-- Ora -->
+            <td class="py-3 px-2 text-center font-numeric text-slate-400 whitespace-nowrap">
+              ${m.time}
+            </td>
+
+            <!-- Segno -->
+            <td class="py-3 px-2 text-center">
+              <span class="font-numeric font-bold bg-slate-800 text-cyan-300 px-2 py-0.5 rounded border border-slate-700">
+                ${m.sign}
+              </span>
+            </td>
+
+            <!-- Probabilità % -->
+            <td class="py-3 px-3 text-center font-numeric font-semibold ${getProbabilityColorClass(m.probability)}">
+              ${Number(m.probability).toFixed(1)}%
+            </td>
+
+            <!-- Squadra A - Squadra B (Colore dinamico in base a probabilità) -->
+            <td class="py-3 px-4">
+              <span class="${getProbabilityColorClass(m.probability)}">
+                ${m.teams}
+              </span>
+            </td>
+
+            <!-- Competizione o Badge 'IN GIOCO' in rosso se attiva -->
+            <td class="py-3 px-3 text-center">
+              ${m.in_gioco ? `
+                <span class="inline-block bg-red-600 text-white font-bold px-2.5 py-0.5 rounded text-[11px] shadow tracking-wider animate-pulse">
+                  IN GIOCO
+                </span>
+              ` : `
+                <span class="text-slate-400 text-xs">${m.competition}</span>
+              `}
+            </td>
+
+            <!-- Quota -->
+            <td class="py-3 px-3 text-center font-numeric font-bold text-amber-400">
+              ${Number(m.odds).toFixed(2)}
+            </td>
+
+            <!-- Value Edge % -->
+            <td class="py-3 px-3 text-center font-numeric font-bold ${valueEdge >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+              ${valueEdge >= 0 ? '+' : ''}${valueEdge.toFixed(2)}%
+            </td>
+
+            <!-- Azioni: Copia riga TSV & Cestino eliminazione -->
+            <td class="py-3 px-3 text-center whitespace-nowrap">
+              <div class="inline-flex items-center gap-1.5">
+                <button onclick="copySingleMatchTSV('${m.id}')" title="Copia riga in TSV" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] font-semibold border border-slate-700 transition active:scale-90">
+                  COPIA
+                </button>
+                <button onclick="deleteMatch('${m.id}')" title="Elimina dal database matches" class="w-7 h-7 rounded bg-rose-950/80 hover:bg-rose-900 text-rose-300 flex items-center justify-center border border-rose-800/40 transition active:scale-90">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+
+        // Vista Testo (Textarea TSV con TAB reali)
+        renderMatchesTextarea();
+      }
+
+      function renderMatchesTextarea() {
+        const textarea = document.getElementById('matchesRawTextarea');
+        if (!textarea) return;
+
+        const header = "Data\tOra\tSegno\tProbabilità%\tSquadra A - Squadra B\tCompetizione\tQuota\tValue Edge%\tStato";
+        const rows = APP_STATE.matches.map(m => {
+          const ve = calculateValueEdge(m.odds, m.probability).toFixed(2);
+          const status = m.in_gioco ? "IN GIOCO" : "DISPONIBILE";
+          return `${m.date}\t${m.time}\t${m.sign}\t${Number(m.probability).toFixed(1)}%\t${m.teams}\t${m.competition}\t${Number(m.odds).toFixed(2)}\t${ve}%\t${status}`;
+        });
+
+        textarea.value = [header, ...rows].join('\n');
+      }
+
+      /**
+       * 5. RENDER MODALE STORICO MARTINGALA
+       */
+      function renderHistoryModal() {
+        const total = APP_STATE.history.length;
+        const wins = APP_STATE.history.filter(h => h.outcome === 'V').length;
+        const losses = APP_STATE.history.filter(h => h.outcome === 'P').length;
+        const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) + '%' : '0.0%';
+
+        document.getElementById('kpiHistoryTotal').textContent = total;
+        document.getElementById('kpiHistoryWins').textContent = wins;
+        document.getElementById('kpiHistoryLosses').textContent = losses;
+        document.getElementById('kpiHistoryWinRate').textContent = winRate;
+
+        const tbody = document.getElementById('historyTableBody');
+        tbody.innerHTML = '';
+
+        if (total === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="8" class="text-center py-8 text-slate-500 italic">
+                Nessuna giocata archiviata ancora. Le partite concluse con esito V o P appariranno qui.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        APP_STATE.history.forEach((h) => {
+          const tr = document.createElement('tr');
+          tr.className = 'border-b border-slate-800/80 hover:bg-slate-850/50 transition';
+          tr.innerHTML = `
+            <td class="py-2 px-3 font-numeric text-slate-400 whitespace-nowrap">${h.date} ${h.time}</td>
+            <td class="py-2 px-3 font-medium text-slate-200">${h.match}</td>
+            <td class="py-2 px-2 text-center font-numeric font-bold text-cyan-300">${h.sign}</td>
+            <td class="py-2 px-2 text-center font-numeric text-amber-300">${h.odds.toFixed(2)}</td>
+            <td class="py-2 px-3 text-center font-numeric text-cyan-300">${formatCurrency(h.puntata)}</td>
+            <td class="py-2 px-3 text-center">
+              <span class="px-2 py-0.5 rounded text-xs font-bold ${h.outcome === 'V' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}">
+                ${h.outcome === 'V' ? 'Vinta' : 'Persa'}
+              </span>
+            </td>
+            <td class="py-2 px-3 text-right font-numeric font-bold text-emerald-400">${formatCurrency(h.cassa)}</td>
+            <td class="py-2 px-3 text-right font-numeric font-bold text-rose-400">${formatCurrency(h.perdita)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      /**
+       * 6. RENDER POPUP SIMULAZIONE ERRORI RESIDUI
+       */
+      function renderSimulationModal() {
+        const currentQuota = APP_STATE.activeRow ? APP_STATE.activeRow.odds : APP_STATE.config.baseQuota;
+        const sim = calculateErroriResidui(
+          APP_STATE.config.cassa,
+          APP_STATE.config.perditaAccumulata,
+          APP_STATE.config.targetRevenuePct,
+          currentQuota
+        );
+
+        document.getElementById('simCassaValue').textContent = formatCurrency(APP_STATE.config.cassa);
+        document.getElementById('simQuotaValue').textContent = currentQuota.toFixed(2);
+        document.getElementById('simRevenueValue').textContent = APP_STATE.config.targetRevenuePct.toFixed(1) + '%';
+        document.getElementById('simTotalErrors').textContent = `${sim.steps} Errori Consecutivi Tollerati`;
+
+        const tbody = document.getElementById('simTableBody');
+        tbody.innerHTML = '';
+
+        if (sim.details.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-center py-4 text-rose-400 font-semibold">
+                Fondi insufficienti per sostenere la puntata minima al target configurato!
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        sim.details.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.className = 'border-b border-slate-800/60 hover:bg-slate-850/40 font-numeric';
+          tr.innerHTML = `
+            <td class="py-2 px-3 text-center font-bold text-slate-300">#${item.step}</td>
+            <td class="py-2 px-3 text-center font-bold text-cyan-300">${formatCurrency(item.bet)}</td>
+            <td class="py-2 px-3 text-right font-bold text-rose-400">${formatCurrency(item.accumulatedLoss)}</td>
+            <td class="py-2 px-3 text-right font-bold text-emerald-400">${formatCurrency(item.remaining)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      function renderAll() {
+        renderHeader();
+        renderConfigBar();
+        renderMartingaleTable();
+        renderMatchesModal();
+      }
+
+      // ==============================================================
+      // GESTORI LOGICA MARTINGALA & AZIONI
+      // ==============================================================
+
+      // Regolazione quota attiva (+ o - 0.01)
+      window.adjustActiveOdds = function(delta) {
+        if (!APP_STATE.activeRow) {
+          // Crea riga attiva temporanea se non c'è ancora
+          APP_STATE.activeRow = {
+            id: 'temp_' + Date.now(),
+            date: new Date().toISOString().split('T')[0],
+            time: '20:45',
+            sign: '1',
+            probability: 65.0,
+            teams: '',
+            competition: '',
+            odds: 1.60
+          };
+        }
+
+        let newOdds = Math.round((APP_STATE.activeRow.odds + delta) * 100) / 100;
+        if (newOdds < 1.01) newOdds = 1.01;
+        APP_STATE.activeRow.odds = newOdds;
+
+        renderHeader();
+        renderMartingaleTable();
+        saveLocalBackup();
+      };
+
+      // Rimuovi partita dalla riga attiva
+      window.removeActiveMatch = function() {
+        if (!APP_STATE.activeRow) return;
+
+        // Se la partita proveniva dall'elenco partite, liberiamola (status in_gioco = false)
+        const matchInList = APP_STATE.matches.find(m => m.id === APP_STATE.activeRow.id || m.teams === APP_STATE.activeRow.teams);
+        if (matchInList) {
+          matchInList.in_gioco = false;
+          syncMatchToSupabase(matchInList);
+        }
+
+        APP_STATE.activeRow = null;
+        showToast('Partita rimossa dalla riga attiva', 'info');
+        renderAll();
+        saveLocalBackup();
+      };
+
+      // Seleziona partita da Elenco Partite per inserirla nella Martingala
+      window.selectMatchForMartingale = function(matchId) {
+        const m = APP_STATE.matches.find(item => item.id === matchId);
+        if (!m) return;
+
+        // Se c'era già una partita in gioco nella riga attiva, liberiamola
+        if (APP_STATE.activeRow) {
+          const prev = APP_STATE.matches.find(item => item.id === APP_STATE.activeRow.id);
+          if (prev) {
+            prev.in_gioco = false;
+            syncMatchToSupabase(prev);
+          }
+        }
+
+        // Imposta la nuova partita come attiva
+        m.in_gioco = true;
+        APP_STATE.activeRow = {
+          id: m.id,
+          date: m.date,
+          time: m.time,
+          sign: m.sign,
+          probability: m.probability,
+          teams: m.teams,
+          competition: m.competition,
+          odds: m.odds
+        };
+
+        syncMatchToSupabase(m);
+        saveLocalBackup();
+        closeMatchesModal();
+        renderAll();
+        showToast(`Partita "${m.teams}" inserita in Martingala e marcata IN GIOCO!`, 'success');
+      };
+
+      // Gestione Esito "V" (Vinta) o "P" (Persa)
+      window.handleActiveOutcome = async function(outcome) {
+        if (!APP_STATE.activeRow || !APP_STATE.activeRow.teams) {
+          showToast('Seleziona prima una partita per la riga attiva premendo "+"', 'warning');
+          return;
+        }
+
+        const row = APP_STATE.activeRow;
+        const odds = row.odds;
+        const prob = row.probability;
+        const valueEdge = calculateValueEdge(odds, prob);
+        const puntata = calculatePuntata(
+          APP_STATE.config.cassa,
+          APP_STATE.config.targetRevenuePct,
+          APP_STATE.config.perditaAccumulata,
+          odds
+        );
+
+        let previousCassa = APP_STATE.config.cassa;
+        let previousPerdita = APP_STATE.config.perditaAccumulata;
+        let resultingCassa = previousCassa;
+        let resultingPerdita = previousPerdita;
+
+        if (outcome === 'V') {
+          // VITTORIA:
+          // Profitto netto = (quota - 1) * puntata
+          const profit = (odds - 1) * puntata;
+          resultingCassa = Math.round((previousCassa + profit) * 100) / 100;
+          // La perdita accumulata si azzera
+          resultingPerdita = 0;
+          showToast(`VINTA! Profitto: +${formatCurrency(profit)} | Perdita azzerata`, 'success');
+        } else {
+          // SCONFITTA:
+          // La cassa diminuisce della puntata
+          resultingCassa = Math.round((previousCassa - puntata) * 100) / 100;
+          // La perdita accumulata aumenta della puntata
+          resultingPerdita = Math.round((previousPerdita + puntata) * 100) / 100;
+          showToast(`PERSA! Puntata: -${formatCurrency(puntata)} | Perdita acc.: ${formatCurrency(resultingPerdita)}`, 'error');
+        }
+
+        // Crea record nello storico congelato
+        const historyRecord = {
+          id: 'hist_' + Date.now(),
+          date: row.date,
+          time: row.time,
+          match: row.teams,
+          sign: row.sign,
+          probability: prob,
+          odds: odds,
+          valueEdge: valueEdge,
+          puntata: puntata,
+          outcome: outcome,
+          cassa: resultingCassa,
+          perdita: resultingPerdita,
+          // Salviamo lo snapshot precedente per consentire l'annullamento se necessario
+          previousSnapshot: {
+            cassa: previousCassa,
+            perdita: previousPerdita,
+            activeRow: { ...row }
+          },
+          timestamp: new Date().toISOString()
+        };
+
+        // Aggiorna lo stato
+        APP_STATE.config.cassa = resultingCassa;
+        APP_STATE.config.perditaAccumulata = resultingPerdita;
+        APP_STATE.history.unshift(historyRecord);
+
+        // La partita nell'elenco non è più in gioco (è stata completata)
+        const matchInList = APP_STATE.matches.find(m => m.id === row.id);
+        if (matchInList) {
+          matchInList.in_gioco = false;
+          await syncMatchToSupabase(matchInList);
+        }
+
+        // Genera automaticamente una nuova riga vuota in cima per la partita successiva
+        APP_STATE.activeRow = null;
+
+        // Sincronizza con Supabase
+        await syncConfigToSupabase();
+        await syncHistoryItemToSupabase(historyRecord);
+
+        renderAll();
+      };
+
+      // Annulla l'esito dell'ultima partita congelata (la più in alto)
+      window.undoLatestHistoryOutcome = async function() {
+        if (APP_STATE.history.length === 0) return;
+
+        const latest = APP_STATE.history[0];
+        if (!latest) return;
+
+        if (latest.previousSnapshot) {
+          APP_STATE.config.cassa = latest.previousSnapshot.cassa;
+          APP_STATE.config.perditaAccumulata = latest.previousSnapshot.perdita;
+          APP_STATE.activeRow = latest.previousSnapshot.activeRow;
+        }
+
+        // Rimuovi dallo storico
+        APP_STATE.history.shift();
+
+        // Rimetti la partita come IN GIOCO se presente in matches
+        if (APP_STATE.activeRow && APP_STATE.activeRow.id) {
+          const matchInList = APP_STATE.matches.find(m => m.id === APP_STATE.activeRow.id);
+          if (matchInList) {
+            matchInList.in_gioco = true;
+            await syncMatchToSupabase(matchInList);
+          }
+        }
+
+        // Sincronizza Supabase
+        await deleteHistoryItemFromSupabase(latest.id);
+        await syncConfigToSupabase();
+
+        showToast('Esito annullato. Partita ripristinata nella riga attiva!', 'info');
+        renderAll();
+      };
+
+      // Eliminazione partita da database matches
+      window.deleteMatch = async function(id) {
+        // Se era attiva, rimuovila
+        if (APP_STATE.activeRow && APP_STATE.activeRow.id === id) {
+          APP_STATE.activeRow = null;
+        }
+
+        APP_STATE.matches = APP_STATE.matches.filter(m => m.id !== id);
+        await deleteMatchFromSupabase(id);
+        renderAll();
+        showToast('Partita eliminata dal database', 'info');
+      };
+
+      // Copia singola riga di Elenco Partite in TSV con TAB reali
+      window.copySingleMatchTSV = function(id) {
+        const m = APP_STATE.matches.find(item => item.id === id);
+        if (!m) return;
+
+        const ve = calculateValueEdge(m.odds, m.probability).toFixed(2);
+        const tsv = `${m.date}\t${m.time}\t${m.sign}\t${m.probability.toFixed(1)}%\t${m.teams}\t${m.competition}\t${m.odds.toFixed(2)}\t${ve}%\t${m.in_gioco ? 'IN GIOCO' : 'DISPONIBILE'}`;
+
+        copyToClipboard(tsv, 'Dati partita copiati in formato TSV!');
+      };
+
+      // Copia negli appunti con fallback
+      function copyToClipboard(text, successMsg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text)
+            .then(() => showToast(successMsg, 'success'))
+            .catch(() => fallbackCopy(text, successMsg));
+        } else {
+          fallbackCopy(text, successMsg);
+        }
+      }
+
+      function fallbackCopy(text, successMsg) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast(successMsg, 'success');
+        } catch (e) {
+          showToast('Errore durante la copia negli appunti', 'error');
+        }
+        document.body.removeChild(ta);
+      }
+
+      // ==============================================================
+      // ESPORTAZIONI: PDF & TSV
+      // ==============================================================
+
+      // Esportazione Tabella Martingala in PDF
+      function exportMartingalePDF() {
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+          showToast('Libreria jsPDF non disponibile al momento', 'error');
+          return;
+        }
+
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF('landscape');
+          const today = new Date().toISOString().split('T')[0];
+
+          // Titolo & Intestazione
+          doc.setFontSize(16);
+          doc.setTextColor(30, 41, 59);
+          doc.text(`REPORT MARTINGALA - ${APP_STATE.config.name} (${APP_STATE.config.code})`, 14, 15);
+
+          doc.setFontSize(10);
+          doc.setTextColor(100, 116, 139);
+          doc.text(`Data Stampa: ${today} | Cassa Attuale: ${formatCurrency(APP_STATE.config.cassa)} | Ricavo Obiettivo: ${APP_STATE.config.targetRevenuePct.toFixed(1)}% | Perdita Accumulata: ${formatCurrency(APP_STATE.config.perditaAccumulata)}`, 14, 22);
+
+          // Prepara dati per autotable
+          const headers = [['Data', 'Ora', 'Partita', 'Segno', 'Prob %', 'Quota', 'Value Edge %', 'Puntata', 'Esito', 'Cassa', 'Perdita']];
+          const rows = [];
+
+          // Se presente riga attiva
+          if (APP_STATE.activeRow && APP_STATE.activeRow.teams) {
+            const r = APP_STATE.activeRow;
+            const ve = calculateValueEdge(r.odds, r.probability).toFixed(2);
+            const p = calculatePuntata(APP_STATE.config.cassa, APP_STATE.config.targetRevenuePct, APP_STATE.config.perditaAccumulata, r.odds);
+            rows.push([
+              r.date,
+              r.time,
+              `${r.teams} (In Corso)`,
+              r.sign,
+              `${r.probability.toFixed(1)}%`,
+              r.odds.toFixed(2),
+              `${ve}%`,
+              formatCurrency(p),
+              'ATTIVA',
+              formatCurrency(APP_STATE.config.cassa),
+              formatCurrency(APP_STATE.config.perditaAccumulata)
+            ]);
+          }
+
+          // Righe congelate storiche
+          APP_STATE.history.forEach(h => {
+            rows.push([
+              h.date,
+              h.time,
+              h.match,
+              h.sign,
+              `${h.probability.toFixed(1)}%`,
+              h.odds.toFixed(2),
+              `${h.valueEdge.toFixed(2)}%`,
+              formatCurrency(h.puntata),
+              h.outcome === 'V' ? 'Vinta' : 'Persa',
+              formatCurrency(h.cassa),
+              formatCurrency(h.perdita)
+            ]);
+          });
+
+          if (rows.length === 0) {
+            rows.push(['N/A', 'N/A', 'Nessuna partita attiva o archiviata', '-', '-', '-', '-', '-', '-', formatCurrency(APP_STATE.config.cassa), '0.00 €']);
+          }
+
+          doc.autoTable({
+            head: headers,
+            body: rows,
+            startY: 28,
+            theme: 'grid',
+            headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' },
+            styles: { fontSize: 8, cellPadding: 3 },
+            alternateRowStyles: { fillColor: [248, 250, 252] }
+          });
+
+          const filename = `Martingala ${today}.pdf`;
+          doc.save(filename);
+          showToast(`PDF esportato: ${filename}`, 'success');
+        } catch (e) {
+          console.error('Errore esportazione PDF:', e);
+          showToast('Errore durante la generazione del PDF', 'error');
+        }
+      }
+
+      // Copia Tabella Martingala Completa in TSV con TAB reali
+      function copyMartingaleTableTSV() {
+        const header = "Data\tOra\tPartita\tSegno\tProbabilità\tQuota\tValue Edge\tPuntata\tV/P\tCassa\tPerdita";
+        const rows = [];
+
+        // Riga attiva se presente
+        if (APP_STATE.activeRow && APP_STATE.activeRow.teams) {
+          const r = APP_STATE.activeRow;
+          const ve = calculateValueEdge(r.odds, r.probability).toFixed(2);
+          const p = calculatePuntata(APP_STATE.config.cassa, APP_STATE.config.targetRevenuePct, APP_STATE.config.perditaAccumulata, r.odds);
+          rows.push(`${r.date}\t${r.time}\t${r.teams}\t${r.sign}\t${r.probability.toFixed(1)}%\t${r.odds.toFixed(2)}\t${ve}%\t${p.toFixed(2)}\tIN CORSO\t${APP_STATE.config.cassa.toFixed(2)}\t${APP_STATE.config.perditaAccumulata.toFixed(2)}`);
+        }
+
+        // Storico
+        APP_STATE.history.forEach(h => {
+          rows.push(`${h.date}\t${h.time}\t${h.match}\t${h.sign}\t${h.probability.toFixed(1)}%\t${h.odds.toFixed(2)}\t${h.valueEdge.toFixed(2)}%\t${h.puntata.toFixed(2)}\t${h.outcome}\t${h.cassa.toFixed(2)}\t${h.perdita.toFixed(2)}`);
+        });
+
+        const fullTSV = [header, ...rows].join('\n');
+        copyToClipboard(fullTSV, 'Tabella Martingala copiata negli appunti in formato TSV (con TAB reali)!');
+      }
+
+      // ==============================================================
+      // GESTIONE MODALI & FORM EVENTI
+      // ==============================================================
+      window.openMatchesModal = function() {
+        document.getElementById('matchesModal').classList.remove('hidden');
+        renderMatchesModal();
+      };
+
+      window.closeMatchesModal = function() {
+        document.getElementById('matchesModal').classList.add('hidden');
+      };
+
+      document.getElementById('btnOpenMatchesModal').addEventListener('click', openMatchesModal);
+      document.getElementById('btnCloseMatchesModal').addEventListener('click', closeMatchesModal);
+
+      // Switch Vista Tabella / Testo in Elenco Partite
+      const btnViewTable = document.getElementById('btnViewTable');
+      const btnViewText = document.getElementById('btnViewText');
+      const matchesTableView = document.getElementById('matchesTableView');
+      const matchesTextView = document.getElementById('matchesTextView');
+
+      btnViewTable.addEventListener('click', () => {
+        APP_STATE.matchesViewMode = 'table';
+        btnViewTable.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow transition';
+        btnViewText.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+        matchesTableView.classList.remove('hidden');
+        matchesTextView.classList.add('hidden');
+        renderMatchesModal();
+      });
+
+      btnViewText.addEventListener('click', () => {
+        APP_STATE.matchesViewMode = 'text';
+        btnViewText.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow transition';
+        btnViewTable.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+        matchesTableView.classList.add('hidden');
+        matchesTextView.classList.remove('hidden');
+        renderMatchesTextarea();
+      });
+
+      // Toggle form rapido nuova partita
+      const btnNewMatchToggle = document.getElementById('btnNewMatchFormToggle');
+      const formContainer = document.getElementById('newMatchFormContainer');
+      btnNewMatchToggle.addEventListener('click', () => {
+        formContainer.classList.toggle('hidden');
+        if (!formContainer.classList.contains('hidden')) {
+          document.getElementById('newMatchDate').value = new Date().toISOString().split('T')[0];
+        }
+      });
+
+      // Submit nuova partita
+      document.getElementById('newMatchForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const date = document.getElementById('newMatchDate').value;
+        const time = document.getElementById('newMatchTime').value;
+        const sign = document.getElementById('newMatchSign').value.trim();
+        const prob = parseFloat(document.getElementById('newMatchProb').value);
+        const teams = document.getElementById('newMatchTeams').value.trim();
+        const comp = document.getElementById('newMatchComp').value.trim();
+        const odds = parseFloat(document.getElementById('newMatchOdds').value);
+
+        if (!date || !time || !sign || isNaN(prob) || !teams || !comp || isNaN(odds)) {
+          showToast('Compila tutti i campi obbligatori', 'warning');
+          return;
+        }
+
+        const newMatch = {
+          id: 'm_' + Date.now(),
+          date,
+          time,
+          sign,
+          probability: prob,
+          teams,
+          competition: comp,
+          odds,
+          in_gioco: false
+        };
+
+        APP_STATE.matches.unshift(newMatch);
+        await syncMatchToSupabase(newMatch);
+
+        // Reset form
+        document.getElementById('newMatchTeams').value = '';
+        document.getElementById('newMatchOdds').value = '';
+        document.getElementById('newMatchProb').value = '';
+        formContainer.classList.add('hidden');
+
+        renderAll();
+        showToast('Nuova partita aggiunta con successo!', 'success');
+      });
+
+      // Salvataggio ed importazione partite da Testo TSV
+      document.getElementById('btnSaveMatchesFromText').addEventListener('click', async () => {
+        const text = document.getElementById('matchesRawTextarea').value.trim();
+        if (!text) {
+          showToast('Il campo testo è vuoto', 'warning');
+          return;
+        }
+
+        const lines = text.split('\n');
+        const parsedMatches = [];
+
+        lines.forEach((line, idx) => {
+          if (!line.trim()) return;
+          const parts = line.split('\t');
+          // Ignora l'intestazione se contiene 'Data' o 'Partita'
+          if (idx === 0 && (parts[0].toLowerCase().includes('data') || parts[2].toLowerCase().includes('segno'))) {
+            return;
+          }
+
+          if (parts.length >= 7) {
+            const date = parts[0].trim();
+            const time = parts[1].trim();
+            const sign = parts[2].trim();
+            const prob = parseFloat(parts[3].replace('%', '').replace(',', '.'));
+            const teams = parts[4].trim();
+            const comp = parts[5].trim();
+            const odds = parseFloat(parts[6].replace(',', '.'));
+            const status = parts[8] ? parts[8].trim().toUpperCase() : 'DISPONIBILE';
+
+            if (teams && !isNaN(prob) && !isNaN(odds)) {
+              parsedMatches.push({
+                id: 'm_' + Math.random().toString(36).substr(2, 9),
+                date: date || new Date().toISOString().split('T')[0],
+                time: time || '20:45',
+                sign: sign || '1',
+                probability: prob,
+                teams,
+                competition: comp || 'Competizione',
+                odds,
+                in_gioco: status === 'IN GIOCO'
+              });
+            }
+          }
+        });
+
+        if (parsedMatches.length > 0) {
+          APP_STATE.matches = parsedMatches;
+          saveLocalBackup();
+
+          // Sincronizza ciascuna su Supabase
+          if (supabase) {
+            for (const m of parsedMatches) {
+              await syncMatchToSupabase(m);
+            }
+          }
+
+          renderAll();
+          showToast(`Importate ${parsedMatches.length} partite dal testo TSV!`, 'success');
+        } else {
+          showToast('Nessuna riga valida riconosciuta. Assicurati che i campi siano separati da TAB', 'error');
+        }
+      });
+
+      // Copia tutto il testo TSV dell'elenco partite
+      document.getElementById('btnCopyAllMatchesTSV').addEventListener('click', () => {
+        const text = document.getElementById('matchesRawTextarea').value;
+        copyToClipboard(text, 'Tutto l\'elenco partite copiato in formato TSV!');
+      });
+
+      // Modale Storico Martingala
+      const historyModal = document.getElementById('historyModal');
+      document.getElementById('btnOpenHistoryModal').addEventListener('click', () => {
+        historyModal.classList.remove('hidden');
+        renderHistoryModal();
+      });
+      document.getElementById('btnCloseHistoryModal').addEventListener('click', () => {
+        historyModal.classList.add('hidden');
+      });
+      document.getElementById('btnCopyHistoryTSV').addEventListener('click', () => {
+        const header = "Data\tOra\tPartita\tSegno\tProb%\tQuota\tValue Edge%\tPuntata\tEsito\tCassa Risultante\tPerdita";
+        const rows = APP_STATE.history.map(h => 
+          `${h.date}\t${h.time}\t${h.match}\t${h.sign}\t${h.probability.toFixed(1)}%\t${h.odds.toFixed(2)}\t${h.valueEdge.toFixed(2)}%\t${h.puntata.toFixed(2)}\t${h.outcome}\t${h.cassa.toFixed(2)}\t${h.perdita.toFixed(2)}`
+        );
+        copyToClipboard([header, ...rows].join('\n'), 'Storico completo copiato in formato TSV!');
+      });
+
+      // Modale Simulazione Errori Residui
+      const simulationModal = document.getElementById('simulationModal');
+      document.getElementById('erroriResiduiCard').addEventListener('click', () => {
+        simulationModal.classList.remove('hidden');
+        renderSimulationModal();
+      });
+      document.getElementById('btnCloseSimulationModal').addEventListener('click', () => {
+        simulationModal.classList.add('hidden');
+      });
+
+      // Modale Nuova Martingala (Reset)
+      const resetModal = document.getElementById('confirmResetModal');
+      document.getElementById('btnNewMartingale').addEventListener('click', () => {
+        resetModal.classList.remove('hidden');
+      });
+      document.getElementById('btnCancelReset').addEventListener('click', () => {
+        resetModal.classList.add('hidden');
+      });
+      document.getElementById('btnConfirmReset').addEventListener('click', async () => {
+        // Azzera la martingala attiva mantenendo inalterato l'Elenco Partite su Supabase
+        APP_STATE.activeRow = null;
+        APP_STATE.config.perditaAccumulata = 0.00;
+        // Incrementa o rinnova codice ciclo
+        const currentCodeNum = parseInt(APP_STATE.config.code.replace(/\D/g, '')) || 1;
+        APP_STATE.config.code = 'MRT-' + String(currentCodeNum + 1).padStart(2, '0');
+        APP_STATE.config.name = 'Ciclo #' + (currentCodeNum + 1);
+
+        resetModal.classList.add('hidden');
+        await syncConfigToSupabase();
+        renderAll();
+        showToast('Nuova Martingala avviata! Perdita azzerata, Elenco Partite intatto.', 'success');
+      });
+
+      // Eventi Pulsanti Configurazione Cassa
+      document.getElementById('btnCassaMinus').addEventListener('click', async () => {
+        APP_STATE.config.cassa = Math.max(1, Math.round((APP_STATE.config.cassa - 10) * 100) / 100);
+        await syncConfigToSupabase();
+        renderAll();
+      });
+
+      document.getElementById('btnCassaPlus').addEventListener('click', async () => {
+        APP_STATE.config.cassa = Math.round((APP_STATE.config.cassa + 10) * 100) / 100;
+        await syncConfigToSupabase();
+        renderAll();
+      });
+
+      document.getElementById('inputCassa').addEventListener('change', async (e) => {
+        const val = parseFloat(e.target.value);
+        if (!isNaN(val) && val > 0) {
+          APP_STATE.config.cassa = Math.round(val * 100) / 100;
+          await syncConfigToSupabase();
+          renderAll();
+        }
+      });
+
+      // Eventi % Ricavo Prevista (+ e - 0.1%)
+      document.getElementById('btnRevenueMinus').addEventListener('click', async () => {
+        APP_STATE.config.targetRevenuePct = Math.max(0.1, Math.round((APP_STATE.config.targetRevenuePct - 0.1) * 10) / 10);
+        await syncConfigToSupabase();
+        renderAll();
+      });
+
+      document.getElementById('btnRevenuePlus').addEventListener('click', async () => {
+        APP_STATE.config.targetRevenuePct = Math.round((APP_STATE.config.targetRevenuePct + 0.1) * 10) / 10;
+        await syncConfigToSupabase();
+        renderAll();
+      });
+
+      // Eventi Nome Martingala & Codice Database
+      document.getElementById('inputMartingaleName').addEventListener('change', async (e) => {
+        APP_STATE.config.name = e.target.value.trim() || 'Ciclo Principale';
+        await syncConfigToSupabase();
+      });
+
+      document.getElementById('inputDatabaseCode').addEventListener('change', async (e) => {
+        APP_STATE.config.code = e.target.value.trim() || 'MRT-01';
+        await syncConfigToSupabase();
+      });
+
+      // Eventi Esportazione PDF e COPIA dalla barra della tabella
+      document.getElementById('btnExportPDF').addEventListener('click', exportMartingalePDF);
+      document.getElementById('btnCopyTableTSV').addEventListener('click', copyMartingaleTableTSV);
+
+      // Chiudi modali cliccando sul backdrop
+      window.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('matchesModal')) closeMatchesModal();
+        if (e.target === historyModal) historyModal.classList.add('hidden');
+        if (e.target === simulationModal) simulationModal.classList.add('hidden');
+        if (e.target === resetModal) resetModal.classList.add('hidden');
+      });
+
+      // ==============================================================
+      // INIZIALIZZAZIONE ALL'AVVIO
+      // ==============================================================
+      window.addEventListener('DOMContentLoaded', async () => {
+        // 1. Carica cache locale immediata
+        loadLocalBackup();
+        renderAll();
+
+        // 2. Tenta sincronizzazione live con Supabase
+        await fetchSupabaseData();
+      });
+
+    </script>
+  </body>
+</html>
