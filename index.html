@@ -120,7 +120,7 @@
           </div>
 
           <!-- Errori Residui Card (Interactive calculation) -->
-          <div id="erroriResiduiCard" class="cursor-pointer group relative bg-slate-800/80 hover:bg-slate-800 border border-amber-500/30 hover:border-amber-500/60 rounded-xl px-4 py-2 flex items-center gap-3 shadow-inner transition">
+          <div id="erroriResiduiCard" onclick="openSimulationModal()" class="cursor-pointer group relative bg-slate-800/80 hover:bg-slate-800 border border-amber-500/30 hover:border-amber-500/60 rounded-xl px-4 py-2 flex items-center gap-3 shadow-inner transition">
             <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-105 transition">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
@@ -142,7 +142,7 @@
         <!-- Bottoni Azione Header (inclusi Elenco Partite, Nuova Martingala e Ingranaggio Impostazioni) -->
         <div class="flex items-center gap-2.5">
           <!-- Tasto Elenco Partite -->
-          <button id="btnOpenMatchesModal" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-900/40 border border-emerald-400/30 transition transform active:scale-95">
+          <button id="btnOpenMatchesModal" onclick="openMatchesModal()" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-900/40 border border-emerald-400/30 transition transform active:scale-95">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
             </svg>
@@ -151,7 +151,7 @@
           </button>
 
           <!-- Tasto Nuova Martingala -->
-          <button id="btnNewMartingale" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 font-semibold text-sm px-3.5 py-2.5 rounded-xl border border-amber-500/30 hover:border-amber-500/60 shadow-md transition transform active:scale-95">
+          <button id="btnNewMartingale" onclick="nuovaMartingala()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 font-semibold text-sm px-3.5 py-2.5 rounded-xl border border-amber-500/30 hover:border-amber-500/60 shadow-md transition transform active:scale-95">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>
@@ -159,7 +159,7 @@
             <span class="sm:hidden">Reset</span>
           </button>
 
-          <!-- NOVITÀ: TASTO INGRANAGGIO IMPOSTAZIONI (IN ALTO A DESTRA) -->
+          <!-- TASTO INGRANAGGIO IMPOSTAZIONI (IN ALTO A DESTRA) -->
           <button id="btnOpenSettingsModal" onclick="openSettingsModal()" title="Impostazioni Connessione Supabase" class="flex items-center justify-center w-11 h-11 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 hover:border-slate-500 shadow-md transition transform active:scale-95 group">
             <svg class="w-5 h-5 text-slate-300 group-hover:text-cyan-400 group-hover:rotate-45 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -225,7 +225,7 @@
 
           <!-- Tasto Elenco Martingala (Cicli Passati) -->
           <div class="flex flex-col justify-end">
-            <button id="btnOpenHistoryModal" class="w-full h-[58px] flex items-center justify-center gap-2.5 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 border border-slate-600 rounded-xl font-semibold text-sm text-slate-200 shadow-md transition active:scale-[0.98]">
+            <button id="btnOpenHistoryModal" onclick="openHistoryModal()" class="w-full h-[58px] flex items-center justify-center gap-2.5 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 border border-slate-600 rounded-xl font-semibold text-sm text-slate-200 shadow-md transition active:scale-[0.98]">
               <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
@@ -262,7 +262,7 @@
             </div>
 
             <!-- Tasto PDF -->
-            <button id="btnExportPDF" class="flex items-center gap-1.5 bg-rose-600/90 hover:bg-rose-500 text-white font-semibold text-xs px-3 py-1.5 rounded-lg border border-rose-400/40 shadow-sm transition active:scale-95">
+            <button id="btnExportPDF" onclick="exportMartingalePDF()" class="flex items-center gap-1.5 bg-rose-600/90 hover:bg-rose-500 text-white font-semibold text-xs px-3 py-1.5 rounded-lg border border-rose-400/40 shadow-sm transition active:scale-95">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
@@ -270,7 +270,7 @@
             </button>
 
             <!-- Tasto COPIA Tabella TSV -->
-            <button id="btnCopyTableTSV" class="flex items-center gap-1.5 bg-indigo-600/90 hover:bg-indigo-500 text-white font-semibold text-xs px-3 py-1.5 rounded-lg border border-indigo-400/40 shadow-sm transition active:scale-95">
+            <button id="btnCopyTableTSV" onclick="copyMartingaleTableTSV()" class="flex items-center gap-1.5 bg-indigo-600/90 hover:bg-indigo-500 text-white font-semibold text-xs px-3 py-1.5 rounded-lg border border-indigo-400/40 shadow-sm transition active:scale-95">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
               </svg>
@@ -336,7 +336,7 @@
             </div>
             <div>
               <h3 class="text-base font-bold text-white">Configurazione Supabase</h3>
-              <p class="text-xs text-slate-400">Credenziali database salvate in locale nel browser</p>
+              <p class="text-xs text-slate-400">Credenziali salvate nel localStorage del browser</p>
             </div>
           </div>
           <button id="btnCloseSettingsModal" onclick="closeSettingsModal()" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">
@@ -349,7 +349,7 @@
           <div class="bg-cyan-950/40 border border-cyan-800/40 rounded-xl p-3 text-xs text-cyan-200 flex items-start gap-2.5">
             <span class="text-base">ℹ️</span>
             <div>
-              Queste chiavi consentono la sincronizzazione in tempo reale delle partite, della configurazione e dello storico con il tuo progetto Supabase. I valori vengono memorizzati nel tuo browser (<code class="text-cyan-300 font-mono">localStorage</code>).
+              Inserisci l'URL del tuo database Supabase e la Chiave API Pubblica (anon / publishable). Le credenziali vengono salvate direttamente nel tuo browser (<code class="text-cyan-300 font-mono">localStorage</code>).
             </div>
           </div>
 
@@ -368,23 +368,20 @@
               Supabase API Key (Publishable / Anon) <span class="text-rose-400">*</span>
             </label>
             <input id="settingSupabaseKey" type="text" placeholder="sb_publishable_... o eyJhbGciOi..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono text-amber-300 placeholder-slate-500 focus:outline-none focus:border-amber-500">
-            <p class="text-[11px] text-slate-500 mt-1">La chiave anon / publishable pubblica del tuo progetto Supabase.</p>
+            <p class="text-[11px] text-slate-500 mt-1">La chiave anon / publishable del tuo progetto Supabase.</p>
           </div>
-
-          <!-- Stato Connessione Test -->
-          <div id="settingsConnectionResult" class="hidden p-3 rounded-xl text-xs border"></div>
         </div>
 
         <!-- Footer Azioni -->
         <div class="bg-slate-850 px-6 py-4 border-t border-slate-800 flex items-center justify-between">
           <button type="button" onclick="resetToInitialCredentials()" class="text-xs text-slate-400 hover:text-slate-200 underline">
-            Ripristina credenziali predefinite
+            Valori consigliati / default
           </button>
           <div class="flex items-center gap-2.5">
             <button type="button" onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
               Annulla
             </button>
-            <button id="btnSaveSettings" type="button" onclick="saveSupabaseSettings()" class="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/40 transition active:scale-95">
+            <button id="btnSaveSettings" type="button" onclick="saveSettings()" class="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/40 transition active:scale-95">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
@@ -405,7 +402,7 @@
         <!-- Header Modale Elenco Partite -->
         <div class="bg-slate-850 px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3 flex-wrap">
           <!-- Torna alla Martingala -->
-          <button id="btnCloseMatchesModal" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-700 transition active:scale-95">
+          <button id="btnCloseMatchesModal" onclick="closeMatchesModal()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-700 transition active:scale-95">
             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -561,7 +558,7 @@
               <p class="text-xs text-slate-400">Tutte le scommesse archiviate e congelate con esito definitivo</p>
             </div>
           </div>
-          <button id="btnCloseHistoryModal" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">
+          <button id="btnCloseHistoryModal" onclick="closeHistoryModal()" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
@@ -637,7 +634,7 @@
               <p class="text-xs text-slate-400">Analisi di sostenibilità bankroll prima del fallimento</p>
             </div>
           </div>
-          <button id="btnCloseSimulationModal" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">
+          <button id="btnCloseSimulationModal" onclick="closeSimulationModal()" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">
             ✕
           </button>
         </div>
@@ -694,10 +691,10 @@
           <strong class="text-emerald-400">L'Elenco Partite su Supabase rimarrà inalterato.</strong>
         </p>
         <div class="flex items-center justify-center gap-3 pt-2">
-          <button id="btnCancelReset" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          <button id="btnCancelReset" onclick="closeResetModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
             Annulla
           </button>
-          <button id="btnConfirmReset" class="px-5 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30 transition">
+          <button id="btnConfirmReset" onclick="confirmResetMartingale()" class="px-5 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30 transition">
             Sì, Conferma e Azzera
           </button>
         </div>
@@ -714,56 +711,41 @@
     <!-- ============================================================== -->
     <script>
       // ==============================================================
-      // CHIAVI STORAGE LOCAL & DEFAULT CONFIGURAZIONE
+      // 1. DICHIARAZIONE UNICA DEL CLIENT SUPABASE (Nessuna collisione)
       // ==============================================================
-      const STORAGE_KEYS = {
-        SUPABASE_URL: 'MARTINGALA_SUPABASE_URL',
-        SUPABASE_KEY: 'MARTINGALA_SUPABASE_KEY',
-        APP_DATA: 'MARTINGALA_PRO_STORAGE_V1'
-      };
+      let supabaseClient = null;
+      let isSupabaseConnected = false;
 
-      // Credenziali fornite come punto di partenza
+      // Chiavi di storage coerenti
+      const KEY_STORAGE_URL = 'supabase_url';
+      const KEY_STORAGE_KEY = 'supabase_key';
+      const KEY_APP_DATA = 'MARTINGALA_PRO_STORAGE_V1';
+
+      // Credenziali predefinite
       const DEFAULT_SUPABASE_URL = 'https://pvsgajldayxlceqodecp.supabase.co';
       const DEFAULT_SUPABASE_KEY = 'sb_publishable_Fz8H-R1gmtCWfSwGz6JaWA_DuG6oWl-UuA';
 
       // ==============================================================
-      // GESTIONE CLIENT DINAMICO SUPABASE
+      // 2. FUNZIONE GLOBALE DI INIZIALIZZAZIONE SUPABASE
       // ==============================================================
-      let supabase = null;
-      let isSupabaseConnected = false;
-      let activeSupabaseUrl = '';
-      let activeSupabaseKey = '';
+      function initSupabase() {
+        const url = localStorage.getItem(KEY_STORAGE_URL) || DEFAULT_SUPABASE_URL;
+        const key = localStorage.getItem(KEY_STORAGE_KEY) || DEFAULT_SUPABASE_KEY;
 
-      /**
-       * Inizializza o reinizializza il client Supabase dinamicamente
-       * leggendo URL e KEY passati come parametri o salvati nel localStorage.
-       */
-      function initSupabaseClient(url, key) {
-        activeSupabaseUrl = (url || '').trim();
-        activeSupabaseKey = (key || '').trim();
-
-        if (!activeSupabaseUrl || !activeSupabaseKey) {
-          supabase = null;
-          isSupabaseConnected = false;
-          updateConnectionBadge(false, 'Credenziali mancanti');
-          return null;
-        }
-
-        try {
-          if (window.supabase && typeof window.supabase.createClient === 'function') {
-            supabase = window.supabase.createClient(activeSupabaseUrl, activeSupabaseKey, {
+        if (url && key && window.supabase && typeof window.supabase.createClient === 'function') {
+          try {
+            supabaseClient = window.supabase.createClient(url.trim(), key.trim(), {
               auth: { persistSession: false }
             });
-            return supabase;
+            return supabaseClient;
+          } catch (err) {
+            console.warn('Inizializzazione supabaseClient non riuscita:', err);
+            supabaseClient = null;
           }
-        } catch (err) {
-          console.warn('Errore creazione client Supabase:', err);
-          supabase = null;
-          isSupabaseConnected = false;
-          updateConnectionBadge(false, 'Errore Client');
         }
         return null;
       }
+      window.initSupabase = initSupabase;
 
       // ==============================================================
       // STATO DELL'APPLICAZIONE (SINGLE SOURCE OF TRUTH)
@@ -784,7 +766,6 @@
         matchesViewMode: 'table'
       };
 
-      // Dati di esempio pronti all'uso
       const DEFAULT_SAMPLE_MATCHES = [
         {
           id: 'm1',
@@ -844,7 +825,7 @@
       ];
 
       // ==============================================================
-      // FUNZIONI UTILITY FORMATTAZIONE & CALCOLO
+      // FUNZIONI FORMATTAZIONE & CALCOLO
       // ==============================================================
       function formatCurrency(val) {
         const num = Number(val) || 0;
@@ -907,7 +888,7 @@
       }
 
       // ==============================================================
-      // SISTEMA NOTIFICHE TOAST
+      // SISTEMA TOAST
       // ==============================================================
       function showToast(message, type = 'info') {
         const container = document.getElementById('toastContainer');
@@ -940,46 +921,40 @@
           setTimeout(() => toast.remove(), 250);
         }, 3200);
       }
+      window.showToast = showToast;
 
       // ==============================================================
-      // GESTIONE MODALE IMPOSTAZIONI (INGRANAGGIO)
+      // 3. TUTTE LE FUNZIONI ONCLICK ESPOSTE SU WINDOW
       // ==============================================================
+
+      // Impostazioni
       window.openSettingsModal = function() {
         const modal = document.getElementById('settingsModal');
         const urlInput = document.getElementById('settingSupabaseUrl');
         const keyInput = document.getElementById('settingSupabaseKey');
-        const resultBox = document.getElementById('settingsConnectionResult');
 
-        // Pre-popola i campi con le credenziali attuali o salvate
-        const savedUrl = localStorage.getItem(STORAGE_KEYS.SUPABASE_URL) || activeSupabaseUrl || DEFAULT_SUPABASE_URL;
-        const savedKey = localStorage.getItem(STORAGE_KEYS.SUPABASE_KEY) || activeSupabaseKey || DEFAULT_SUPABASE_KEY;
+        const savedUrl = localStorage.getItem(KEY_STORAGE_URL) || DEFAULT_SUPABASE_URL;
+        const savedKey = localStorage.getItem(KEY_STORAGE_KEY) || DEFAULT_SUPABASE_KEY;
 
         urlInput.value = savedUrl;
         keyInput.value = savedKey;
-
-        if (resultBox) {
-          resultBox.className = 'hidden';
-          resultBox.innerHTML = '';
-        }
 
         modal.classList.remove('hidden');
       };
 
       window.closeSettingsModal = function() {
-        const modal = document.getElementById('settingsModal');
-        modal.classList.add('hidden');
+        document.getElementById('settingsModal').classList.add('hidden');
       };
 
       window.resetToInitialCredentials = function() {
         document.getElementById('settingSupabaseUrl').value = DEFAULT_SUPABASE_URL;
         document.getElementById('settingSupabaseKey').value = DEFAULT_SUPABASE_KEY;
-        showToast('Credenziali reimpostate ai valori predefiniti. Clicca "Salva Configurazione"', 'info');
+        showToast('Campi impostati sui valori di default', 'info');
       };
 
-      window.saveSupabaseSettings = async function() {
+      window.saveSettings = async function() {
         const urlInput = document.getElementById('settingSupabaseUrl');
         const keyInput = document.getElementById('settingSupabaseKey');
-        const resultBox = document.getElementById('settingsConnectionResult');
         const saveBtn = document.getElementById('btnSaveSettings');
 
         const newUrl = urlInput.value.trim();
@@ -990,32 +965,21 @@
           return;
         }
 
-        // Feedback visivo salvataggio
         saveBtn.disabled = true;
-        saveBtn.innerHTML = `
-          <svg class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-          </svg>
-          <span>Verifica & Salvataggio...</span>
-        `;
+        saveBtn.innerHTML = `<span>Salvataggio...</span>`;
 
         try {
-          // Salva in localStorage
-          localStorage.setItem(STORAGE_KEYS.SUPABASE_URL, newUrl);
-          localStorage.setItem(STORAGE_KEYS.SUPABASE_KEY, newKey);
+          localStorage.setItem(KEY_STORAGE_URL, newUrl);
+          localStorage.setItem(KEY_STORAGE_KEY, newKey);
 
-          // Reinizializza client Supabase dinamico
-          initSupabaseClient(newUrl, newKey);
-
-          // Test connessione rapido
+          initSupabase();
           await fetchSupabaseData();
 
           showToast('Configurazione salvata con successo!', 'success');
           closeSettingsModal();
         } catch (err) {
-          console.warn('Errore salvataggio impostazioni:', err);
-          showToast('Credenziali salvate. Modalità locale e sincronizzazione attiva.', 'info');
+          console.warn('Errore salvataggio credenziali:', err);
+          showToast('Configurazione salvata. Modalità locale e sincronizzazione attiva.', 'info');
           closeSettingsModal();
         } finally {
           saveBtn.disabled = false;
@@ -1027,6 +991,377 @@
           `;
         }
       };
+      window.saveSupabaseSettings = window.saveSettings;
+
+      // Elenco Partite Modal
+      window.openMatchesModal = function() {
+        document.getElementById('matchesModal').classList.remove('hidden');
+        renderMatchesModal();
+      };
+      window.apriElencoPartite = window.openMatchesModal;
+
+      window.closeMatchesModal = function() {
+        document.getElementById('matchesModal').classList.add('hidden');
+      };
+
+      // Storico Martingala Modal
+      window.openHistoryModal = function() {
+        document.getElementById('historyModal').classList.remove('hidden');
+        renderHistoryModal();
+      };
+
+      window.closeHistoryModal = function() {
+        document.getElementById('historyModal').classList.add('hidden');
+      };
+
+      // Simulazione Errori Residui Modal
+      window.openSimulationModal = function() {
+        document.getElementById('simulationModal').classList.remove('hidden');
+        renderSimulationModal();
+      };
+
+      window.closeSimulationModal = function() {
+        document.getElementById('simulationModal').classList.add('hidden');
+      };
+
+      // Nuova Martingala Modal
+      window.nuovaMartingala = function() {
+        document.getElementById('confirmResetModal').classList.remove('hidden');
+      };
+
+      window.closeResetModal = function() {
+        document.getElementById('confirmResetModal').classList.add('hidden');
+      };
+
+      window.confirmResetMartingale = async function() {
+        APP_STATE.activeRow = null;
+        APP_STATE.config.perditaAccumulata = 0.00;
+        const currentCodeNum = parseInt(APP_STATE.config.code.replace(/\D/g, '')) || 1;
+        APP_STATE.config.code = 'MRT-' + String(currentCodeNum + 1).padStart(2, '0');
+        APP_STATE.config.name = 'Ciclo #' + (currentCodeNum + 1);
+
+        closeResetModal();
+        await syncConfigToSupabase();
+        renderAll();
+        showToast('Nuova Martingala avviata! Perdita azzerata, Elenco Partite intatto.', 'success');
+      };
+
+      // Regolazione quota attiva (+ o - 0.01)
+      window.adjustActiveOdds = function(delta) {
+        if (!APP_STATE.activeRow) {
+          APP_STATE.activeRow = {
+            id: 'temp_' + Date.now(),
+            date: new Date().toISOString().split('T')[0],
+            time: '20:45',
+            sign: '1',
+            probability: 65.0,
+            teams: '',
+            competition: '',
+            odds: 1.60
+          };
+        }
+
+        let newOdds = Math.round((APP_STATE.activeRow.odds + delta) * 100) / 100;
+        if (newOdds < 1.01) newOdds = 1.01;
+        APP_STATE.activeRow.odds = newOdds;
+
+        renderHeader();
+        renderMartingaleTable();
+        saveLocalBackup();
+      };
+
+      window.removeActiveMatch = function() {
+        if (!APP_STATE.activeRow) return;
+
+        const matchInList = APP_STATE.matches.find(m => m.id === APP_STATE.activeRow.id || m.teams === APP_STATE.activeRow.teams);
+        if (matchInList) {
+          matchInList.in_gioco = false;
+          syncMatchToSupabase(matchInList);
+        }
+
+        APP_STATE.activeRow = null;
+        showToast('Partita rimossa dalla riga attiva', 'info');
+        renderAll();
+        saveLocalBackup();
+      };
+
+      window.selectMatchForMartingale = function(matchId) {
+        const m = APP_STATE.matches.find(item => item.id === matchId);
+        if (!m) return;
+
+        if (APP_STATE.activeRow) {
+          const prev = APP_STATE.matches.find(item => item.id === APP_STATE.activeRow.id);
+          if (prev) {
+            prev.in_gioco = false;
+            syncMatchToSupabase(prev);
+          }
+        }
+
+        m.in_gioco = true;
+        APP_STATE.activeRow = {
+          id: m.id,
+          date: m.date,
+          time: m.time,
+          sign: m.sign,
+          probability: m.probability,
+          teams: m.teams,
+          competition: m.competition,
+          odds: m.odds
+        };
+
+        syncMatchToSupabase(m);
+        saveLocalBackup();
+        closeMatchesModal();
+        renderAll();
+        showToast(`Partita "${m.teams}" inserita in Martingala e marcata IN GIOCO!`, 'success');
+      };
+
+      window.handleActiveOutcome = async function(outcome) {
+        if (!APP_STATE.activeRow || !APP_STATE.activeRow.teams) {
+          showToast('Seleziona prima una partita per la riga attiva premendo "+"', 'warning');
+          return;
+        }
+
+        const row = APP_STATE.activeRow;
+        const odds = row.odds;
+        const prob = row.probability;
+        const valueEdge = calculateValueEdge(odds, prob);
+        const puntata = calculatePuntata(
+          APP_STATE.config.cassa,
+          APP_STATE.config.targetRevenuePct,
+          APP_STATE.config.perditaAccumulata,
+          odds
+        );
+
+        let previousCassa = APP_STATE.config.cassa;
+        let previousPerdita = APP_STATE.config.perditaAccumulata;
+        let resultingCassa = previousCassa;
+        let resultingPerdita = previousPerdita;
+
+        if (outcome === 'V') {
+          const profit = (odds - 1) * puntata;
+          resultingCassa = Math.round((previousCassa + profit) * 100) / 100;
+          resultingPerdita = 0;
+          showToast(`VINTA! Profitto: +${formatCurrency(profit)} | Perdita azzerata`, 'success');
+        } else {
+          resultingCassa = Math.round((previousCassa - puntata) * 100) / 100;
+          resultingPerdita = Math.round((previousPerdita + puntata) * 100) / 100;
+          showToast(`PERSA! Puntata: -${formatCurrency(puntata)} | Perdita acc.: ${formatCurrency(resultingPerdita)}`, 'error');
+        }
+
+        const historyRecord = {
+          id: 'hist_' + Date.now(),
+          date: row.date,
+          time: row.time,
+          match: row.teams,
+          sign: row.sign,
+          probability: prob,
+          odds: odds,
+          valueEdge: valueEdge,
+          puntata: puntata,
+          outcome: outcome,
+          cassa: resultingCassa,
+          perdita: resultingPerdita,
+          previousSnapshot: {
+            cassa: previousCassa,
+            perdita: previousPerdita,
+            activeRow: { ...row }
+          },
+          timestamp: new Date().toISOString()
+        };
+
+        APP_STATE.config.cassa = resultingCassa;
+        APP_STATE.config.perditaAccumulata = resultingPerdita;
+        APP_STATE.history.unshift(historyRecord);
+
+        const matchInList = APP_STATE.matches.find(m => m.id === row.id);
+        if (matchInList) {
+          matchInList.in_gioco = false;
+          await syncMatchToSupabase(matchInList);
+        }
+
+        APP_STATE.activeRow = null;
+
+        await syncConfigToSupabase();
+        await syncHistoryItemToSupabase(historyRecord);
+
+        renderAll();
+      };
+
+      window.undoLatestHistoryOutcome = async function() {
+        if (APP_STATE.history.length === 0) return;
+
+        const latest = APP_STATE.history[0];
+        if (!latest) return;
+
+        if (latest.previousSnapshot) {
+          APP_STATE.config.cassa = latest.previousSnapshot.cassa;
+          APP_STATE.config.perditaAccumulata = latest.previousSnapshot.perdita;
+          APP_STATE.activeRow = latest.previousSnapshot.activeRow;
+        }
+
+        APP_STATE.history.shift();
+
+        if (APP_STATE.activeRow && APP_STATE.activeRow.id) {
+          const matchInList = APP_STATE.matches.find(m => m.id === APP_STATE.activeRow.id);
+          if (matchInList) {
+            matchInList.in_gioco = true;
+            await syncMatchToSupabase(matchInList);
+          }
+        }
+
+        await deleteHistoryItemFromSupabase(latest.id);
+        await syncConfigToSupabase();
+
+        showToast('Esito annullato. Partita ripristinata nella riga attiva!', 'info');
+        renderAll();
+      };
+
+      window.deleteMatch = async function(id) {
+        if (APP_STATE.activeRow && APP_STATE.activeRow.id === id) {
+          APP_STATE.activeRow = null;
+        }
+
+        APP_STATE.matches = APP_STATE.matches.filter(m => m.id !== id);
+        await deleteMatchFromSupabase(id);
+        renderAll();
+        showToast('Partita eliminata dal database', 'info');
+      };
+
+      window.copySingleMatchTSV = function(id) {
+        const m = APP_STATE.matches.find(item => item.id === id);
+        if (!m) return;
+
+        const ve = calculateValueEdge(m.odds, m.probability).toFixed(2);
+        const tsv = `${m.date}\t${m.time}\t${m.sign}\t${m.probability.toFixed(1)}%\t${m.teams}\t${m.competition}\t${m.odds.toFixed(2)}\t${ve}%\t${m.in_gioco ? 'IN GIOCO' : 'DISPONIBILE'}`;
+
+        copyToClipboard(tsv, 'Dati partita copiati in formato TSV!');
+      };
+
+      window.exportMartingalePDF = function() {
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+          showToast('Libreria jsPDF non disponibile al momento', 'error');
+          return;
+        }
+
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF('landscape');
+          const today = new Date().toISOString().split('T')[0];
+
+          doc.setFontSize(16);
+          doc.setTextColor(30, 41, 59);
+          doc.text(`REPORT MARTINGALA - ${APP_STATE.config.name} (${APP_STATE.config.code})`, 14, 15);
+
+          doc.setFontSize(10);
+          doc.setTextColor(100, 116, 139);
+          doc.text(`Data Stampa: ${today} | Cassa Attuale: ${formatCurrency(APP_STATE.config.cassa)} | Ricavo Obiettivo: ${APP_STATE.config.targetRevenuePct.toFixed(1)}% | Perdita Accumulata: ${formatCurrency(APP_STATE.config.perditaAccumulata)}`, 14, 22);
+
+          const headers = [['Data', 'Ora', 'Partita', 'Segno', 'Prob %', 'Quota', 'Value Edge %', 'Puntata', 'Esito', 'Cassa', 'Perdita']];
+          const rows = [];
+
+          if (APP_STATE.activeRow && APP_STATE.activeRow.teams) {
+            const r = APP_STATE.activeRow;
+            const ve = calculateValueEdge(r.odds, r.probability).toFixed(2);
+            const p = calculatePuntata(APP_STATE.config.cassa, APP_STATE.config.targetRevenuePct, APP_STATE.config.perditaAccumulata, r.odds);
+            rows.push([
+              r.date,
+              r.time,
+              `${r.teams} (In Corso)`,
+              r.sign,
+              `${r.probability.toFixed(1)}%`,
+              r.odds.toFixed(2),
+              `${ve}%`,
+              formatCurrency(p),
+              'ATTIVA',
+              formatCurrency(APP_STATE.config.cassa),
+              formatCurrency(APP_STATE.config.perditaAccumulata)
+            ]);
+          }
+
+          APP_STATE.history.forEach(h => {
+            rows.push([
+              h.date,
+              h.time,
+              h.match,
+              h.sign,
+              `${h.probability.toFixed(1)}%`,
+              h.odds.toFixed(2),
+              `${h.valueEdge.toFixed(2)}%`,
+              formatCurrency(h.puntata),
+              h.outcome === 'V' ? 'Vinta' : 'Persa',
+              formatCurrency(h.cassa),
+              formatCurrency(h.perdita)
+            ]);
+          });
+
+          if (rows.length === 0) {
+            rows.push(['N/A', 'N/A', 'Nessuna partita attiva o archiviata', '-', '-', '-', '-', '-', '-', formatCurrency(APP_STATE.config.cassa), '0.00 €']);
+          }
+
+          doc.autoTable({
+            head: headers,
+            body: rows,
+            startY: 28,
+            theme: 'grid',
+            headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' },
+            styles: { fontSize: 8, cellPadding: 3 },
+            alternateRowStyles: { fillColor: [248, 250, 252] }
+          });
+
+          const filename = `Martingala ${today}.pdf`;
+          doc.save(filename);
+          showToast(`PDF esportato: ${filename}`, 'success');
+        } catch (e) {
+          console.error('Errore esportazione PDF:', e);
+          showToast('Errore durante la generazione del PDF', 'error');
+        }
+      };
+
+      window.copyMartingaleTableTSV = function() {
+        const header = "Data\tOra\tPartita\tSegno\tProbabilità\tQuota\tValue Edge\tPuntata\tV/P\tCassa\tPerdita";
+        const rows = [];
+
+        if (APP_STATE.activeRow && APP_STATE.activeRow.teams) {
+          const r = APP_STATE.activeRow;
+          const ve = calculateValueEdge(r.odds, r.probability).toFixed(2);
+          const p = calculatePuntata(APP_STATE.config.cassa, APP_STATE.config.targetRevenuePct, APP_STATE.config.perditaAccumulata, r.odds);
+          rows.push(`${r.date}\t${r.time}\t${r.teams}\t${r.sign}\t${r.probability.toFixed(1)}%\t${r.odds.toFixed(2)}\t${ve}%\t${p.toFixed(2)}\tIN CORSO\t${APP_STATE.config.cassa.toFixed(2)}\t${APP_STATE.config.perditaAccumulata.toFixed(2)}`);
+        }
+
+        APP_STATE.history.forEach(h => {
+          rows.push(`${h.date}\t${h.time}\t${h.match}\t${h.sign}\t${h.probability.toFixed(1)}%\t${h.odds.toFixed(2)}\t${h.valueEdge.toFixed(2)}%\t${h.puntata.toFixed(2)}\t${h.outcome}\t${h.cassa.toFixed(2)}\t${h.perdita.toFixed(2)}`);
+        });
+
+        const fullTSV = [header, ...rows].join('\n');
+        copyToClipboard(fullTSV, 'Tabella Martingala copiata negli appunti in formato TSV!');
+      };
+
+      function copyToClipboard(text, successMsg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text)
+            .then(() => showToast(successMsg, 'success'))
+            .catch(() => fallbackCopy(text, successMsg));
+        } else {
+          fallbackCopy(text, successMsg);
+        }
+      }
+
+      function fallbackCopy(text, successMsg) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast(successMsg, 'success');
+        } catch (e) {
+          showToast('Errore durante la copia negli appunti', 'error');
+        }
+        document.body.removeChild(ta);
+      }
 
       function updateConnectionBadge(online, customLabel = null) {
         const badge = document.getElementById('supabaseStatusBadge');
@@ -1047,7 +1382,7 @@
       // ==============================================================
       function saveLocalBackup() {
         try {
-          localStorage.setItem(STORAGE_KEYS.APP_DATA, JSON.stringify({
+          localStorage.setItem(KEY_APP_DATA, JSON.stringify({
             config: APP_STATE.config,
             activeRow: APP_STATE.activeRow,
             history: APP_STATE.history,
@@ -1060,7 +1395,7 @@
 
       function loadLocalBackup() {
         try {
-          const raw = localStorage.getItem(STORAGE_KEYS.APP_DATA);
+          const raw = localStorage.getItem(KEY_APP_DATA);
           if (raw) {
             const data = JSON.parse(raw);
             if (data.config) Object.assign(APP_STATE.config, data.config);
@@ -1082,10 +1417,10 @@
 
       async function syncConfigToSupabase() {
         saveLocalBackup();
-        if (!supabase) return;
+        if (!supabaseClient) return;
 
         try {
-          const { error } = await supabase
+          const { error } = await supabaseClient
             .from('config')
             .upsert({
               id: APP_STATE.config.id,
@@ -1108,10 +1443,10 @@
 
       async function syncMatchToSupabase(match) {
         saveLocalBackup();
-        if (!supabase) return;
+        if (!supabaseClient) return;
 
         try {
-          const { error } = await supabase
+          const { error } = await supabaseClient
             .from('matches')
             .upsert({
               id: match.id,
@@ -1137,10 +1472,10 @@
 
       async function deleteMatchFromSupabase(id) {
         saveLocalBackup();
-        if (!supabase) return;
+        if (!supabaseClient) return;
 
         try {
-          await supabase.from('matches').delete().eq('id', id);
+          await supabaseClient.from('matches').delete().eq('id', id);
         } catch (err) {
           console.warn('Supabase delete match err:', err);
         }
@@ -1148,10 +1483,10 @@
 
       async function syncHistoryItemToSupabase(item) {
         saveLocalBackup();
-        if (!supabase) return;
+        if (!supabaseClient) return;
 
         try {
-          const { error } = await supabase
+          const { error } = await supabaseClient
             .from('history')
             .insert({
               id: item.id,
@@ -1181,24 +1516,23 @@
 
       async function deleteHistoryItemFromSupabase(id) {
         saveLocalBackup();
-        if (!supabase) return;
+        if (!supabaseClient) return;
 
         try {
-          await supabase.from('history').delete().eq('id', id);
+          await supabaseClient.from('history').delete().eq('id', id);
         } catch (err) {
           console.warn('Supabase delete history err:', err);
         }
       }
 
       async function fetchSupabaseData() {
-        if (!supabase) {
+        if (!supabaseClient) {
           updateConnectionBadge(false);
           return;
         }
 
         try {
-          // 1. Lettura Config
-          const { data: configData, error: configErr } = await supabase
+          const { data: configData, error: configErr } = await supabaseClient
             .from('config')
             .select('*')
             .limit(1)
@@ -1213,8 +1547,7 @@
             isSupabaseConnected = true;
           }
 
-          // 2. Lettura Matches
-          const { data: matchesData, error: matchesErr } = await supabase
+          const { data: matchesData, error: matchesErr } = await supabaseClient
             .from('matches')
             .select('*')
             .order('date', { ascending: true });
@@ -1234,8 +1567,7 @@
             isSupabaseConnected = true;
           }
 
-          // 3. Lettura History
-          const { data: historyData, error: historyErr } = await supabase
+          const { data: historyData, error: historyErr } = await supabaseClient
             .from('history')
             .select('*')
             .order('created_at', { ascending: false });
@@ -1262,7 +1594,7 @@
           updateConnectionBadge(isSupabaseConnected);
           renderAll();
         } catch (err) {
-          console.warn('Connessione Supabase opzionale / offline:', err);
+          console.warn('Connessione Supabase non disponibile / offline:', err);
           updateConnectionBadge(false);
         }
       }
@@ -1298,9 +1630,7 @@
         const tbody = document.getElementById('martingaleTableBody');
         tbody.innerHTML = '';
 
-        // -------------------------------------------------------------
         // PRIMA RIGA ATTIVA (IN CIMA)
-        // -------------------------------------------------------------
         const trActive = document.createElement('tr');
         trActive.className = 'bg-slate-900/90 border-b border-emerald-500/30 hover:bg-slate-855/80 transition';
 
@@ -1321,19 +1651,14 @@
         const teamsVal = row ? row.teams : '';
 
         trActive.innerHTML = `
-          <!-- Data -->
           <td class="py-3 px-3 font-numeric text-slate-300 whitespace-nowrap">
             <span class="inline-block bg-slate-800/80 text-emerald-300 font-bold px-2 py-0.5 rounded text-[11px] border border-emerald-500/20">
               ${dateVal}
             </span>
           </td>
-
-          <!-- Ora -->
           <td class="py-3 px-2 font-numeric text-slate-300 text-center whitespace-nowrap">
             ${timeVal}
           </td>
-
-          <!-- Partita con tasto + (apri elenco) e tasto X -->
           <td class="py-3 px-3">
             <div class="flex items-center gap-1.5 min-w-[220px]">
               <button onclick="openMatchesModal()" title="Seleziona partita dall'Elenco" class="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center shadow-md transition active:scale-90 flex-shrink-0">
@@ -1351,20 +1676,14 @@
               ` : ''}
             </div>
           </td>
-
-          <!-- Segno -->
           <td class="py-3 px-2 text-center">
             <span class="font-numeric font-bold bg-slate-800 text-cyan-300 px-2 py-0.5 rounded border border-slate-700">
               ${signVal}
             </span>
           </td>
-
-          <!-- Probabilità -->
           <td class="py-3 px-3 text-center font-numeric font-semibold ${getProbabilityColorClass(prob)}">
             ${prob.toFixed(1)}%
           </td>
-
-          <!-- Quota con tasti - e + (step 0.01) -->
           <td class="py-3 px-3 text-center">
             <div class="inline-flex items-center gap-1 bg-slate-950 border border-slate-700/80 rounded-lg p-0.5">
               <button onclick="adjustActiveOdds(-0.01)" title="Diminuisci quota di 0.01" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center text-xs transition">
@@ -1378,18 +1697,12 @@
               </button>
             </div>
           </td>
-
-          <!-- Value Edge -->
           <td class="py-3 px-3 text-center font-numeric font-bold ${valueEdge >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
             ${valueEdge >= 0 ? '+' : ''}${valueEdge.toFixed(2)}%
           </td>
-
-          <!-- Puntata -->
           <td class="py-3 px-3 text-center font-numeric font-bold text-cyan-300 text-sm">
             ${formatCurrency(puntata)}
           </td>
-
-          <!-- Pulsanti V / P -->
           <td class="py-3 px-3 text-center whitespace-nowrap">
             <div class="inline-flex items-center gap-1.5">
               <button onclick="handleActiveOutcome('V')" title="Esito Vinto" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-900/30 transition active:scale-95">
@@ -1400,13 +1713,9 @@
               </button>
             </div>
           </td>
-
-          <!-- Cassa Corrente -->
           <td class="py-3 px-3 text-right font-numeric font-semibold text-slate-300">
             ${formatCurrency(APP_STATE.config.cassa)}
           </td>
-
-          <!-- Perdita Progressiva -->
           <td class="py-3 px-3 text-right font-numeric font-bold text-rose-400">
             ${formatCurrency(APP_STATE.config.perditaAccumulata)}
           </td>
@@ -1414,9 +1723,7 @@
 
         tbody.appendChild(trActive);
 
-        // -------------------------------------------------------------
-        // RIGHE CONGELATE (STORICO) ORDINATE DISCENDENTI
-        // -------------------------------------------------------------
+        // RIGHE CONGELATE STORICHE
         APP_STATE.history.forEach((item, index) => {
           const isLatestHistory = index === 0;
           const trHistory = document.createElement('tr');
@@ -1658,603 +1965,225 @@
       }
 
       // ==============================================================
-      // GESTORI LOGICA MARTINGALA & AZIONI
-      // ==============================================================
-      window.adjustActiveOdds = function(delta) {
-        if (!APP_STATE.activeRow) {
-          APP_STATE.activeRow = {
-            id: 'temp_' + Date.now(),
-            date: new Date().toISOString().split('T')[0],
-            time: '20:45',
-            sign: '1',
-            probability: 65.0,
-            teams: '',
-            competition: '',
-            odds: 1.60
-          };
-        }
-
-        let newOdds = Math.round((APP_STATE.activeRow.odds + delta) * 100) / 100;
-        if (newOdds < 1.01) newOdds = 1.01;
-        APP_STATE.activeRow.odds = newOdds;
-
-        renderHeader();
-        renderMartingaleTable();
-        saveLocalBackup();
-      };
-
-      window.removeActiveMatch = function() {
-        if (!APP_STATE.activeRow) return;
-
-        const matchInList = APP_STATE.matches.find(m => m.id === APP_STATE.activeRow.id || m.teams === APP_STATE.activeRow.teams);
-        if (matchInList) {
-          matchInList.in_gioco = false;
-          syncMatchToSupabase(matchInList);
-        }
-
-        APP_STATE.activeRow = null;
-        showToast('Partita rimossa dalla riga attiva', 'info');
-        renderAll();
-        saveLocalBackup();
-      };
-
-      window.selectMatchForMartingale = function(matchId) {
-        const m = APP_STATE.matches.find(item => item.id === matchId);
-        if (!m) return;
-
-        if (APP_STATE.activeRow) {
-          const prev = APP_STATE.matches.find(item => item.id === APP_STATE.activeRow.id);
-          if (prev) {
-            prev.in_gioco = false;
-            syncMatchToSupabase(prev);
-          }
-        }
-
-        m.in_gioco = true;
-        APP_STATE.activeRow = {
-          id: m.id,
-          date: m.date,
-          time: m.time,
-          sign: m.sign,
-          probability: m.probability,
-          teams: m.teams,
-          competition: m.competition,
-          odds: m.odds
-        };
-
-        syncMatchToSupabase(m);
-        saveLocalBackup();
-        closeMatchesModal();
-        renderAll();
-        showToast(`Partita "${m.teams}" inserita in Martingala e marcata IN GIOCO!`, 'success');
-      };
-
-      window.handleActiveOutcome = async function(outcome) {
-        if (!APP_STATE.activeRow || !APP_STATE.activeRow.teams) {
-          showToast('Seleziona prima una partita per la riga attiva premendo "+"', 'warning');
-          return;
-        }
-
-        const row = APP_STATE.activeRow;
-        const odds = row.odds;
-        const prob = row.probability;
-        const valueEdge = calculateValueEdge(odds, prob);
-        const puntata = calculatePuntata(
-          APP_STATE.config.cassa,
-          APP_STATE.config.targetRevenuePct,
-          APP_STATE.config.perditaAccumulata,
-          odds
-        );
-
-        let previousCassa = APP_STATE.config.cassa;
-        let previousPerdita = APP_STATE.config.perditaAccumulata;
-        let resultingCassa = previousCassa;
-        let resultingPerdita = previousPerdita;
-
-        if (outcome === 'V') {
-          const profit = (odds - 1) * puntata;
-          resultingCassa = Math.round((previousCassa + profit) * 100) / 100;
-          resultingPerdita = 0;
-          showToast(`VINTA! Profitto: +${formatCurrency(profit)} | Perdita azzerata`, 'success');
-        } else {
-          resultingCassa = Math.round((previousCassa - puntata) * 100) / 100;
-          resultingPerdita = Math.round((previousPerdita + puntata) * 100) / 100;
-          showToast(`PERSA! Puntata: -${formatCurrency(puntata)} | Perdita acc.: ${formatCurrency(resultingPerdita)}`, 'error');
-        }
-
-        const historyRecord = {
-          id: 'hist_' + Date.now(),
-          date: row.date,
-          time: row.time,
-          match: row.teams,
-          sign: row.sign,
-          probability: prob,
-          odds: odds,
-          valueEdge: valueEdge,
-          puntata: puntata,
-          outcome: outcome,
-          cassa: resultingCassa,
-          perdita: resultingPerdita,
-          previousSnapshot: {
-            cassa: previousCassa,
-            perdita: previousPerdita,
-            activeRow: { ...row }
-          },
-          timestamp: new Date().toISOString()
-        };
-
-        APP_STATE.config.cassa = resultingCassa;
-        APP_STATE.config.perditaAccumulata = resultingPerdita;
-        APP_STATE.history.unshift(historyRecord);
-
-        const matchInList = APP_STATE.matches.find(m => m.id === row.id);
-        if (matchInList) {
-          matchInList.in_gioco = false;
-          await syncMatchToSupabase(matchInList);
-        }
-
-        APP_STATE.activeRow = null;
-
-        await syncConfigToSupabase();
-        await syncHistoryItemToSupabase(historyRecord);
-
-        renderAll();
-      };
-
-      window.undoLatestHistoryOutcome = async function() {
-        if (APP_STATE.history.length === 0) return;
-
-        const latest = APP_STATE.history[0];
-        if (!latest) return;
-
-        if (latest.previousSnapshot) {
-          APP_STATE.config.cassa = latest.previousSnapshot.cassa;
-          APP_STATE.config.perditaAccumulata = latest.previousSnapshot.perdita;
-          APP_STATE.activeRow = latest.previousSnapshot.activeRow;
-        }
-
-        APP_STATE.history.shift();
-
-        if (APP_STATE.activeRow && APP_STATE.activeRow.id) {
-          const matchInList = APP_STATE.matches.find(m => m.id === APP_STATE.activeRow.id);
-          if (matchInList) {
-            matchInList.in_gioco = true;
-            await syncMatchToSupabase(matchInList);
-          }
-        }
-
-        await deleteHistoryItemFromSupabase(latest.id);
-        await syncConfigToSupabase();
-
-        showToast('Esito annullato. Partita ripristinata nella riga attiva!', 'info');
-        renderAll();
-      };
-
-      window.deleteMatch = async function(id) {
-        if (APP_STATE.activeRow && APP_STATE.activeRow.id === id) {
-          APP_STATE.activeRow = null;
-        }
-
-        APP_STATE.matches = APP_STATE.matches.filter(m => m.id !== id);
-        await deleteMatchFromSupabase(id);
-        renderAll();
-        showToast('Partita eliminata dal database', 'info');
-      };
-
-      window.copySingleMatchTSV = function(id) {
-        const m = APP_STATE.matches.find(item => item.id === id);
-        if (!m) return;
-
-        const ve = calculateValueEdge(m.odds, m.probability).toFixed(2);
-        const tsv = `${m.date}\t${m.time}\t${m.sign}\t${m.probability.toFixed(1)}%\t${m.teams}\t${m.competition}\t${m.odds.toFixed(2)}\t${ve}%\t${m.in_gioco ? 'IN GIOCO' : 'DISPONIBILE'}`;
-
-        copyToClipboard(tsv, 'Dati partita copiati in formato TSV!');
-      };
-
-      function copyToClipboard(text, successMsg) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text)
-            .then(() => showToast(successMsg, 'success'))
-            .catch(() => fallbackCopy(text, successMsg));
-        } else {
-          fallbackCopy(text, successMsg);
-        }
-      }
-
-      function fallbackCopy(text, successMsg) {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        try {
-          document.execCommand('copy');
-          showToast(successMsg, 'success');
-        } catch (e) {
-          showToast('Errore durante la copia negli appunti', 'error');
-        }
-        document.body.removeChild(ta);
-      }
-
-      // ==============================================================
-      // ESPORTAZIONI: PDF & TSV
-      // ==============================================================
-      function exportMartingalePDF() {
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-          showToast('Libreria jsPDF non disponibile al momento', 'error');
-          return;
-        }
-
-        try {
-          const { jsPDF } = window.jspdf;
-          const doc = new jsPDF('landscape');
-          const today = new Date().toISOString().split('T')[0];
-
-          doc.setFontSize(16);
-          doc.setTextColor(30, 41, 59);
-          doc.text(`REPORT MARTINGALA - ${APP_STATE.config.name} (${APP_STATE.config.code})`, 14, 15);
-
-          doc.setFontSize(10);
-          doc.setTextColor(100, 116, 139);
-          doc.text(`Data Stampa: ${today} | Cassa Attuale: ${formatCurrency(APP_STATE.config.cassa)} | Ricavo Obiettivo: ${APP_STATE.config.targetRevenuePct.toFixed(1)}% | Perdita Accumulata: ${formatCurrency(APP_STATE.config.perditaAccumulata)}`, 14, 22);
-
-          const headers = [['Data', 'Ora', 'Partita', 'Segno', 'Prob %', 'Quota', 'Value Edge %', 'Puntata', 'Esito', 'Cassa', 'Perdita']];
-          const rows = [];
-
-          if (APP_STATE.activeRow && APP_STATE.activeRow.teams) {
-            const r = APP_STATE.activeRow;
-            const ve = calculateValueEdge(r.odds, r.probability).toFixed(2);
-            const p = calculatePuntata(APP_STATE.config.cassa, APP_STATE.config.targetRevenuePct, APP_STATE.config.perditaAccumulata, r.odds);
-            rows.push([
-              r.date,
-              r.time,
-              `${r.teams} (In Corso)`,
-              r.sign,
-              `${r.probability.toFixed(1)}%`,
-              r.odds.toFixed(2),
-              `${ve}%`,
-              formatCurrency(p),
-              'ATTIVA',
-              formatCurrency(APP_STATE.config.cassa),
-              formatCurrency(APP_STATE.config.perditaAccumulata)
-            ]);
-          }
-
-          APP_STATE.history.forEach(h => {
-            rows.push([
-              h.date,
-              h.time,
-              h.match,
-              h.sign,
-              `${h.probability.toFixed(1)}%`,
-              h.odds.toFixed(2),
-              `${h.valueEdge.toFixed(2)}%`,
-              formatCurrency(h.puntata),
-              h.outcome === 'V' ? 'Vinta' : 'Persa',
-              formatCurrency(h.cassa),
-              formatCurrency(h.perdita)
-            ]);
-          });
-
-          if (rows.length === 0) {
-            rows.push(['N/A', 'N/A', 'Nessuna partita attiva o archiviata', '-', '-', '-', '-', '-', '-', formatCurrency(APP_STATE.config.cassa), '0.00 €']);
-          }
-
-          doc.autoTable({
-            head: headers,
-            body: rows,
-            startY: 28,
-            theme: 'grid',
-            headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' },
-            styles: { fontSize: 8, cellPadding: 3 },
-            alternateRowStyles: { fillColor: [248, 250, 252] }
-          });
-
-          const filename = `Martingala ${today}.pdf`;
-          doc.save(filename);
-          showToast(`PDF esportato: ${filename}`, 'success');
-        } catch (e) {
-          console.error('Errore esportazione PDF:', e);
-          showToast('Errore durante la generazione del PDF', 'error');
-        }
-      }
-
-      function copyMartingaleTableTSV() {
-        const header = "Data\tOra\tPartita\tSegno\tProbabilità\tQuota\tValue Edge\tPuntata\tV/P\tCassa\tPerdita";
-        const rows = [];
-
-        if (APP_STATE.activeRow && APP_STATE.activeRow.teams) {
-          const r = APP_STATE.activeRow;
-          const ve = calculateValueEdge(r.odds, r.probability).toFixed(2);
-          const p = calculatePuntata(APP_STATE.config.cassa, APP_STATE.config.targetRevenuePct, APP_STATE.config.perditaAccumulata, r.odds);
-          rows.push(`${r.date}\t${r.time}\t${r.teams}\t${r.sign}\t${r.probability.toFixed(1)}%\t${r.odds.toFixed(2)}\t${ve}%\t${p.toFixed(2)}\tIN CORSO\t${APP_STATE.config.cassa.toFixed(2)}\t${APP_STATE.config.perditaAccumulata.toFixed(2)}`);
-        }
-
-        APP_STATE.history.forEach(h => {
-          rows.push(`${h.date}\t${h.time}\t${h.match}\t${h.sign}\t${h.probability.toFixed(1)}%\t${h.odds.toFixed(2)}\t${h.valueEdge.toFixed(2)}%\t${h.puntata.toFixed(2)}\t${h.outcome}\t${h.cassa.toFixed(2)}\t${h.perdita.toFixed(2)}`);
-        });
-
-        const fullTSV = [header, ...rows].join('\n');
-        copyToClipboard(fullTSV, 'Tabella Martingala copiata negli appunti in formato TSV (con TAB reali)!');
-      }
-
-      // ==============================================================
-      // GESTIONE MODALI & FORM EVENTI
-      // ==============================================================
-      window.openMatchesModal = function() {
-        document.getElementById('matchesModal').classList.remove('hidden');
-        renderMatchesModal();
-      };
-
-      window.closeMatchesModal = function() {
-        document.getElementById('matchesModal').classList.add('hidden');
-      };
-
-      document.getElementById('btnOpenMatchesModal').addEventListener('click', openMatchesModal);
-      document.getElementById('btnCloseMatchesModal').addEventListener('click', closeMatchesModal);
-
-      const btnViewTable = document.getElementById('btnViewTable');
-      const btnViewText = document.getElementById('btnViewText');
-      const matchesTableView = document.getElementById('matchesTableView');
-      const matchesTextView = document.getElementById('matchesTextView');
-
-      btnViewTable.addEventListener('click', () => {
-        APP_STATE.matchesViewMode = 'table';
-        btnViewTable.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow transition';
-        btnViewText.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
-        matchesTableView.classList.remove('hidden');
-        matchesTextView.classList.add('hidden');
-        renderMatchesModal();
-      });
-
-      btnViewText.addEventListener('click', () => {
-        APP_STATE.matchesViewMode = 'text';
-        btnViewText.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow transition';
-        btnViewTable.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
-        matchesTableView.classList.add('hidden');
-        matchesTextView.classList.remove('hidden');
-        renderMatchesTextarea();
-      });
-
-      const btnNewMatchToggle = document.getElementById('btnNewMatchFormToggle');
-      const formContainer = document.getElementById('newMatchFormContainer');
-      btnNewMatchToggle.addEventListener('click', () => {
-        formContainer.classList.toggle('hidden');
-        if (!formContainer.classList.contains('hidden')) {
-          document.getElementById('newMatchDate').value = new Date().toISOString().split('T')[0];
-        }
-      });
-
-      document.getElementById('newMatchForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const date = document.getElementById('newMatchDate').value;
-        const time = document.getElementById('newMatchTime').value;
-        const sign = document.getElementById('newMatchSign').value.trim();
-        const prob = parseFloat(document.getElementById('newMatchProb').value);
-        const teams = document.getElementById('newMatchTeams').value.trim();
-        const comp = document.getElementById('newMatchComp').value.trim();
-        const odds = parseFloat(document.getElementById('newMatchOdds').value);
-
-        if (!date || !time || !sign || isNaN(prob) || !teams || !comp || isNaN(odds)) {
-          showToast('Compila tutti i campi obbligatori', 'warning');
-          return;
-        }
-
-        const newMatch = {
-          id: 'm_' + Date.now(),
-          date,
-          time,
-          sign,
-          probability: prob,
-          teams,
-          competition: comp,
-          odds,
-          in_gioco: false
-        };
-
-        APP_STATE.matches.unshift(newMatch);
-        await syncMatchToSupabase(newMatch);
-
-        document.getElementById('newMatchTeams').value = '';
-        document.getElementById('newMatchOdds').value = '';
-        document.getElementById('newMatchProb').value = '';
-        formContainer.classList.add('hidden');
-
-        renderAll();
-        showToast('Nuova partita aggiunta con successo!', 'success');
-      });
-
-      document.getElementById('btnSaveMatchesFromText').addEventListener('click', async () => {
-        const text = document.getElementById('matchesRawTextarea').value.trim();
-        if (!text) {
-          showToast('Il campo testo è vuoto', 'warning');
-          return;
-        }
-
-        const lines = text.split('\n');
-        const parsedMatches = [];
-
-        lines.forEach((line, idx) => {
-          if (!line.trim()) return;
-          const parts = line.split('\t');
-          if (idx === 0 && (parts[0].toLowerCase().includes('data') || (parts[2] && parts[2].toLowerCase().includes('segno')))) {
-            return;
-          }
-
-          if (parts.length >= 7) {
-            const date = parts[0].trim();
-            const time = parts[1].trim();
-            const sign = parts[2].trim();
-            const prob = parseFloat(parts[3].replace('%', '').replace(',', '.'));
-            const teams = parts[4].trim();
-            const comp = parts[5].trim();
-            const odds = parseFloat(parts[6].replace(',', '.'));
-            const status = parts[8] ? parts[8].trim().toUpperCase() : 'DISPONIBILE';
-
-            if (teams && !isNaN(prob) && !isNaN(odds)) {
-              parsedMatches.push({
-                id: 'm_' + Math.random().toString(36).substr(2, 9),
-                date: date || new Date().toISOString().split('T')[0],
-                time: time || '20:45',
-                sign: sign || '1',
-                probability: prob,
-                teams,
-                competition: comp || 'Competizione',
-                odds,
-                in_gioco: status === 'IN GIOCO'
-              });
-            }
-          }
-        });
-
-        if (parsedMatches.length > 0) {
-          APP_STATE.matches = parsedMatches;
-          saveLocalBackup();
-
-          if (supabase) {
-            for (const m of parsedMatches) {
-              await syncMatchToSupabase(m);
-            }
-          }
-
-          renderAll();
-          showToast(`Importate ${parsedMatches.length} partite dal testo TSV!`, 'success');
-        } else {
-          showToast('Nessuna riga valida riconosciuta. Assicurati che i campi siano separati da TAB', 'error');
-        }
-      });
-
-      document.getElementById('btnCopyAllMatchesTSV').addEventListener('click', () => {
-        const text = document.getElementById('matchesRawTextarea').value;
-        copyToClipboard(text, 'Tutto l\'elenco partite copiato in formato TSV!');
-      });
-
-      const historyModal = document.getElementById('historyModal');
-      document.getElementById('btnOpenHistoryModal').addEventListener('click', () => {
-        historyModal.classList.remove('hidden');
-        renderHistoryModal();
-      });
-      document.getElementById('btnCloseHistoryModal').addEventListener('click', () => {
-        historyModal.classList.add('hidden');
-      });
-      document.getElementById('btnCopyHistoryTSV').addEventListener('click', () => {
-        const header = "Data\tOra\tPartita\tSegno\tProb%\tQuota\tValue Edge%\tPuntata\tEsito\tCassa Risultante\tPerdita";
-        const rows = APP_STATE.history.map(h => 
-          `${h.date}\t${h.time}\t${h.match}\t${h.sign}\t${h.probability.toFixed(1)}%\t${h.odds.toFixed(2)}\t${h.valueEdge.toFixed(2)}%\t${h.puntata.toFixed(2)}\t${h.outcome}\t${h.cassa.toFixed(2)}\t${h.perdita.toFixed(2)}`
-        );
-        copyToClipboard([header, ...rows].join('\n'), 'Storico completo copiato in formato TSV!');
-      });
-
-      const simulationModal = document.getElementById('simulationModal');
-      document.getElementById('erroriResiduiCard').addEventListener('click', () => {
-        simulationModal.classList.remove('hidden');
-        renderSimulationModal();
-      });
-      document.getElementById('btnCloseSimulationModal').addEventListener('click', () => {
-        simulationModal.classList.add('hidden');
-      });
-
-      const resetModal = document.getElementById('confirmResetModal');
-      document.getElementById('btnNewMartingale').addEventListener('click', () => {
-        resetModal.classList.remove('hidden');
-      });
-      document.getElementById('btnCancelReset').addEventListener('click', () => {
-        resetModal.classList.add('hidden');
-      });
-      document.getElementById('btnConfirmReset').addEventListener('click', async () => {
-        APP_STATE.activeRow = null;
-        APP_STATE.config.perditaAccumulata = 0.00;
-        const currentCodeNum = parseInt(APP_STATE.config.code.replace(/\D/g, '')) || 1;
-        APP_STATE.config.code = 'MRT-' + String(currentCodeNum + 1).padStart(2, '0');
-        APP_STATE.config.name = 'Ciclo #' + (currentCodeNum + 1);
-
-        resetModal.classList.add('hidden');
-        await syncConfigToSupabase();
-        renderAll();
-        showToast('Nuova Martingala avviata! Perdita azzerata, Elenco Partite intatto.', 'success');
-      });
-
-      document.getElementById('btnCassaMinus').addEventListener('click', async () => {
-        APP_STATE.config.cassa = Math.max(1, Math.round((APP_STATE.config.cassa - 10) * 100) / 100);
-        await syncConfigToSupabase();
-        renderAll();
-      });
-
-      document.getElementById('btnCassaPlus').addEventListener('click', async () => {
-        APP_STATE.config.cassa = Math.round((APP_STATE.config.cassa + 10) * 100) / 100;
-        await syncConfigToSupabase();
-        renderAll();
-      });
-
-      document.getElementById('inputCassa').addEventListener('change', async (e) => {
-        const val = parseFloat(e.target.value);
-        if (!isNaN(val) && val > 0) {
-          APP_STATE.config.cassa = Math.round(val * 100) / 100;
-          await syncConfigToSupabase();
-          renderAll();
-        }
-      });
-
-      document.getElementById('btnRevenueMinus').addEventListener('click', async () => {
-        APP_STATE.config.targetRevenuePct = Math.max(0.1, Math.round((APP_STATE.config.targetRevenuePct - 0.1) * 10) / 10);
-        await syncConfigToSupabase();
-        renderAll();
-      });
-
-      document.getElementById('btnRevenuePlus').addEventListener('click', async () => {
-        APP_STATE.config.targetRevenuePct = Math.round((APP_STATE.config.targetRevenuePct + 0.1) * 10) / 10;
-        await syncConfigToSupabase();
-        renderAll();
-      });
-
-      document.getElementById('inputMartingaleName').addEventListener('change', async (e) => {
-        APP_STATE.config.name = e.target.value.trim() || 'Ciclo Principale';
-        await syncConfigToSupabase();
-      });
-
-      document.getElementById('inputDatabaseCode').addEventListener('change', async (e) => {
-        APP_STATE.config.code = e.target.value.trim() || 'MRT-01';
-        await syncConfigToSupabase();
-      });
-
-      document.getElementById('btnExportPDF').addEventListener('click', exportMartingalePDF);
-      document.getElementById('btnCopyTableTSV').addEventListener('click', copyMartingaleTableTSV);
-
-      window.addEventListener('click', (e) => {
-        if (e.target === document.getElementById('matchesModal')) closeMatchesModal();
-        if (e.target === document.getElementById('settingsModal')) closeSettingsModal();
-        if (e.target === historyModal) historyModal.classList.add('hidden');
-        if (e.target === simulationModal) simulationModal.classList.add('hidden');
-        if (e.target === resetModal) resetModal.classList.add('hidden');
-      });
-
-      // ==============================================================
-      // INIZIALIZZAZIONE ALL'AVVIO
+      // EVENT LISTENERS AUSILIARI
       // ==============================================================
       window.addEventListener('DOMContentLoaded', async () => {
-        // 1. Carica cache locale immediata dei dati
+        // 1. Carica i dati salvati in locale
         loadLocalBackup();
         renderAll();
 
-        // 2. Controllo credenziali Supabase nel localStorage
-        const savedUrl = localStorage.getItem(STORAGE_KEYS.SUPABASE_URL);
-        const savedKey = localStorage.getItem(STORAGE_KEYS.SUPABASE_KEY);
+        // 2. Controllo credenziali nel localStorage
+        const savedUrl = localStorage.getItem(KEY_STORAGE_URL);
+        const savedKey = localStorage.getItem(KEY_STORAGE_KEY);
 
         if (!savedUrl || !savedKey) {
-          // PRIMA VOLTA: Apre automaticamente la modale delle impostazioni
-          // precompilando con i parametri predefiniti per comodità
+          // PRIMA VOLTA: se NON ci sono chiavi nel localStorage, apri automaticamente la modale
           openSettingsModal();
-          showToast('Benvenuto! Inserisci le credenziali Supabase per iniziare', 'info');
-          // Inizializza temporaneamente per non lasciare il client null
-          initSupabaseClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_KEY);
+          showToast('Configura Supabase inserendo URL e API Key', 'info');
         } else {
-          // Credenziali già presenti: inizializza dinamicamente
-          initSupabaseClient(savedUrl, savedKey);
+          // Inizializza client con le chiavi salvate
+          initSupabase();
         }
 
-        // 3. Sincronizzazione asincrona
+        // 3. Tenta sincronizzazione con il database
         await fetchSupabaseData();
+
+        // 4. Inizializza i toggle e i form
+        const btnViewTable = document.getElementById('btnViewTable');
+        const btnViewText = document.getElementById('btnViewText');
+        const matchesTableView = document.getElementById('matchesTableView');
+        const matchesTextView = document.getElementById('matchesTextView');
+
+        btnViewTable.addEventListener('click', () => {
+          APP_STATE.matchesViewMode = 'table';
+          btnViewTable.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow transition';
+          btnViewText.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+          matchesTableView.classList.remove('hidden');
+          matchesTextView.classList.add('hidden');
+          renderMatchesModal();
+        });
+
+        btnViewText.addEventListener('click', () => {
+          APP_STATE.matchesViewMode = 'text';
+          btnViewText.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow transition';
+          btnViewTable.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+          matchesTableView.classList.add('hidden');
+          matchesTextView.classList.remove('hidden');
+          renderMatchesTextarea();
+        });
+
+        const btnNewMatchToggle = document.getElementById('btnNewMatchFormToggle');
+        const formContainer = document.getElementById('newMatchFormContainer');
+        btnNewMatchToggle.addEventListener('click', () => {
+          formContainer.classList.toggle('hidden');
+          if (!formContainer.classList.contains('hidden')) {
+            document.getElementById('newMatchDate').value = new Date().toISOString().split('T')[0];
+          }
+        });
+
+        document.getElementById('newMatchForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const date = document.getElementById('newMatchDate').value;
+          const time = document.getElementById('newMatchTime').value;
+          const sign = document.getElementById('newMatchSign').value.trim();
+          const prob = parseFloat(document.getElementById('newMatchProb').value);
+          const teams = document.getElementById('newMatchTeams').value.trim();
+          const comp = document.getElementById('newMatchComp').value.trim();
+          const odds = parseFloat(document.getElementById('newMatchOdds').value);
+
+          if (!date || !time || !sign || isNaN(prob) || !teams || !comp || isNaN(odds)) {
+            showToast('Compila tutti i campi obbligatori', 'warning');
+            return;
+          }
+
+          const newMatch = {
+            id: 'm_' + Date.now(),
+            date,
+            time,
+            sign,
+            probability: prob,
+            teams,
+            competition: comp,
+            odds,
+            in_gioco: false
+          };
+
+          APP_STATE.matches.unshift(newMatch);
+          await syncMatchToSupabase(newMatch);
+
+          document.getElementById('newMatchTeams').value = '';
+          document.getElementById('newMatchOdds').value = '';
+          document.getElementById('newMatchProb').value = '';
+          formContainer.classList.add('hidden');
+
+          renderAll();
+          showToast('Nuova partita aggiunta con successo!', 'success');
+        });
+
+        document.getElementById('btnSaveMatchesFromText').addEventListener('click', async () => {
+          const text = document.getElementById('matchesRawTextarea').value.trim();
+          if (!text) {
+            showToast('Il campo testo è vuoto', 'warning');
+            return;
+          }
+
+          const lines = text.split('\n');
+          const parsedMatches = [];
+
+          lines.forEach((line, idx) => {
+            if (!line.trim()) return;
+            const parts = line.split('\t');
+            if (idx === 0 && (parts[0].toLowerCase().includes('data') || (parts[2] && parts[2].toLowerCase().includes('segno')))) {
+              return;
+            }
+
+            if (parts.length >= 7) {
+              const date = parts[0].trim();
+              const time = parts[1].trim();
+              const sign = parts[2].trim();
+              const prob = parseFloat(parts[3].replace('%', '').replace(',', '.'));
+              const teams = parts[4].trim();
+              const comp = parts[5].trim();
+              const odds = parseFloat(parts[6].replace(',', '.'));
+              const status = parts[8] ? parts[8].trim().toUpperCase() : 'DISPONIBILE';
+
+              if (teams && !isNaN(prob) && !isNaN(odds)) {
+                parsedMatches.push({
+                  id: 'm_' + Math.random().toString(36).substr(2, 9),
+                  date: date || new Date().toISOString().split('T')[0],
+                  time: time || '20:45',
+                  sign: sign || '1',
+                  probability: prob,
+                  teams,
+                  competition: comp || 'Competizione',
+                  odds,
+                  in_gioco: status === 'IN GIOCO'
+                });
+              }
+            }
+          });
+
+          if (parsedMatches.length > 0) {
+            APP_STATE.matches = parsedMatches;
+            saveLocalBackup();
+
+            if (supabaseClient) {
+              for (const m of parsedMatches) {
+                await syncMatchToSupabase(m);
+              }
+            }
+
+            renderAll();
+            showToast(`Importate ${parsedMatches.length} partite dal testo TSV!`, 'success');
+          } else {
+            showToast('Nessuna riga valida riconosciuta. Assicurati che i campi siano separati da TAB', 'error');
+          }
+        });
+
+        document.getElementById('btnCopyAllMatchesTSV').addEventListener('click', () => {
+          const text = document.getElementById('matchesRawTextarea').value;
+          copyToClipboard(text, 'Tutto l\'elenco partite copiato in formato TSV!');
+        });
+
+        document.getElementById('btnCopyHistoryTSV').addEventListener('click', () => {
+          const header = "Data\tOra\tPartita\tSegno\tProb%\tQuota\tValue Edge%\tPuntata\tEsito\tCassa Risultante\tPerdita";
+          const rows = APP_STATE.history.map(h => 
+            `${h.date}\t${h.time}\t${h.match}\t${h.sign}\t${h.probability.toFixed(1)}%\t${h.odds.toFixed(2)}\t${h.valueEdge.toFixed(2)}%\t${h.puntata.toFixed(2)}\t${h.outcome}\t${h.cassa.toFixed(2)}\t${h.perdita.toFixed(2)}`
+          );
+          copyToClipboard([header, ...rows].join('\n'), 'Storico completo copiato in formato TSV!');
+        });
+
+        document.getElementById('btnCassaMinus').addEventListener('click', async () => {
+          APP_STATE.config.cassa = Math.max(1, Math.round((APP_STATE.config.cassa - 10) * 100) / 100);
+          await syncConfigToSupabase();
+          renderAll();
+        });
+
+        document.getElementById('btnCassaPlus').addEventListener('click', async () => {
+          APP_STATE.config.cassa = Math.round((APP_STATE.config.cassa + 10) * 100) / 100;
+          await syncConfigToSupabase();
+          renderAll();
+        });
+
+        document.getElementById('inputCassa').addEventListener('change', async (e) => {
+          const val = parseFloat(e.target.value);
+          if (!isNaN(val) && val > 0) {
+            APP_STATE.config.cassa = Math.round(val * 100) / 100;
+            await syncConfigToSupabase();
+            renderAll();
+          }
+        });
+
+        document.getElementById('btnRevenueMinus').addEventListener('click', async () => {
+          APP_STATE.config.targetRevenuePct = Math.max(0.1, Math.round((APP_STATE.config.targetRevenuePct - 0.1) * 10) / 10);
+          await syncConfigToSupabase();
+          renderAll();
+        });
+
+        document.getElementById('btnRevenuePlus').addEventListener('click', async () => {
+          APP_STATE.config.targetRevenuePct = Math.round((APP_STATE.config.targetRevenuePct + 0.1) * 10) / 10;
+          await syncConfigToSupabase();
+          renderAll();
+        });
+
+        document.getElementById('inputMartingaleName').addEventListener('change', async (e) => {
+          APP_STATE.config.name = e.target.value.trim() || 'Ciclo Principale';
+          await syncConfigToSupabase();
+        });
+
+        document.getElementById('inputDatabaseCode').addEventListener('change', async (e) => {
+          APP_STATE.config.code = e.target.value.trim() || 'MRT-01';
+          await syncConfigToSupabase();
+        });
+      });
+
+      // Chiusura modali cliccando sul backdrop
+      window.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('matchesModal')) closeMatchesModal();
+        if (e.target === document.getElementById('settingsModal')) closeSettingsModal();
+        if (e.target === document.getElementById('historyModal')) closeHistoryModal();
+        if (e.target === document.getElementById('simulationModal')) closeSimulationModal();
+        if (e.target === document.getElementById('confirmResetModal')) closeResetModal();
       });
 
     </script>
