@@ -1135,29 +1135,16 @@
 
       /**
        * Inserisce un nuovo record nella tabella 'config' di Supabase.
-       * REGOLE TASSATIVE APPLICATE:
-       * 1. NON include MAI la chiave 'id' nell'oggetto JSON inviato a Supabase.
-       * 2. Invia SOLO i campi necessari:
-       *    {
-       *      codice_database: nuovoCodice,
-       *      nome_martingala: nuovoNome,
-       *      cassa_iniziale: cassaIniziale,
-       *      cassa_attuale: cassaIniziale,
-       *      percentuale_ricavo: percentualeRicavo
-       *    }
-       * 3. Lascia che sia Supabase / PostgreSQL a gestire l'autoincremento della chiave primaria 'id'.
-       * 4. Se la sequenza interna di PostgreSQL è disallineata con ID inseriti in precedenza
-       *    (errore "duplicate key value violates unique constraint config_pkey"),
-       *    un ciclo di retry ripete l'insert senza id: ogni tentativo avanza automaticamente
-       *    nextval('config_id_seq') fino a superare le chiavi esistenti ed eseguire l'inserimento.
-       * 5. Restituisce il nuovo record creato (.select()).
+       * 1. Rimosso completamente qualsiasi invio o assegnazione del campo 'id'.
+       * 2. Invia a Supabase SOLO un oggetto pulito contenente:
+       *    codice_database, nome_martingala, cassa_iniziale, cassa_attuale e percentuale_ricavo.
+       * 3. Lascia che sia l'autoincremento nativo del database a gestire la chiave primaria.
        */
       async function insertConfigToSupabase(payload) {
         if (!supabaseClient) {
           return { data: null, error: new Error('Client Supabase non inizializzato') };
         }
 
-        // Costruzione rigorosa: SOLO i campi necessari, MAI la chiave 'id'
         const cleanPayload = {
           codice_database: String(payload.codice_database).trim(),
           nome_martingala: String(payload.nome_martingala).trim(),
@@ -1165,36 +1152,30 @@
           cassa_attuale: Number(payload.cassa_attuale !== undefined ? payload.cassa_attuale : 100.00),
           percentuale_ricavo: Number(payload.percentuale_ricavo !== undefined ? payload.percentuale_ricavo : 1.0)
         };
-        delete cleanPayload.id;
 
-        console.log('Esecuzione INSERT su tabella config (senza chiave id):', cleanPayload);
+        console.log('Esecuzione INSERT su tabella config (autoincrement nativo, senza campo id):', cleanPayload);
 
-        let lastError = null;
-        for (let attempt = 1; attempt <= 30; attempt++) {
+        try {
           const { data, error } = await supabaseClient
             .from('config')
             .insert([cleanPayload])
             .select();
 
           if (!error && Array.isArray(data) && data.length > 0) {
-            console.log(`Record inserito con successo su config (tentativo ${attempt}):`, data[0]);
+            console.log('Record inserito con successo su config:', data[0]);
             return { data: data[0], error: null };
           }
 
-          lastError = error;
-          const msg = error ? (error.message || '') : '';
-          console.warn(`Tentativo ${attempt}/30 INSERT config:`, msg);
-
-          const isPkeyCollision = msg.includes('config_pkey') || msg.includes('duplicate key');
-          if (!isPkeyCollision) {
-            // Errore non relativo alla sequenza autoincrementale di 'id'
-            break;
+          if (error) {
+            console.error('Errore INSERT config:', error);
+            return { data: null, error };
           }
-          // Breve delay per far avanzare la sequenza
-          await new Promise(r => setTimeout(r, 40));
-        }
 
-        return { data: null, error: lastError };
+          return { data: cleanPayload, error: null };
+        } catch (err) {
+          console.error('Eccezione durante INSERT config:', err);
+          return { data: null, error: err };
+        }
       }
       window.insertConfigToSupabase = insertConfigToSupabase;
 
@@ -1206,23 +1187,35 @@
 
         let createdRecord = null;
 
-        // 1. Esegui la vera chiamata INSERT su Supabase SENZA MAI inviare la chiave 'id'
+        // Inserimento su Supabase senza campo 'id', lasciando la chiave primaria all'autoincremento nativo
         if (supabaseClient) {
-          const { data, error } = await insertConfigToSupabase({
-            codice_database: newCode,
-            nome_martingala: newName,
-            cassa_iniziale: cassa,
-            cassa_attuale: cassa,
-            percentuale_ricavo: percentuale
-          });
+          try {
+            console.log(`Inserimento nuova martingala su 'config' (codice=${newCode}) senza campo id...`);
+            const { data, error } = await supabaseClient.from('config').insert([{
+              codice_database: newCode,
+              nome_martingala: newName,
+              cassa_iniziale: cassa,
+              cassa_attuale: cassa,
+              percentuale_ricavo: percentuale
+            }]).select();
 
-          if (error) {
-            console.error('Errore INSERT nuova martingala:', error);
-            showToast('Errore creazione ciclo su Supabase: ' + error.message, 'error');
-          } else {
-            createdRecord = data;
-            console.log('Nuova martingala inserita e restituita da Supabase:', createdRecord);
-            showToast(`Nuova Martingala ${newCode} inserita nel database!`, 'success');
+            if (error) {
+              console.error('Errore INSERT nuova martingala:', error);
+              showToast('Errore creazione ciclo su Supabase: ' + error.message, 'error');
+            } else {
+              createdRecord = (Array.isArray(data) && data.length > 0) ? data[0] : {
+                codice_database: newCode,
+                nome_martingala: newName,
+                cassa_iniziale: cassa,
+                cassa_attuale: cassa,
+                percentuale_ricavo: percentuale
+              };
+              console.log('Nuova martingala inserita e confermata da Supabase:', createdRecord);
+              showToast(`Nuova Martingala ${newCode} inserita nel database!`, 'success');
+            }
+          } catch (err) {
+            console.error('Eccezione durante insert nuova martingala:', err);
+            showToast('Errore comunicazione database: ' + err.message, 'error');
           }
         }
 
