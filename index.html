@@ -95,9 +95,9 @@
               <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
                 MARTINGALA PRO
               </h1>
-              <span id="supabaseStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-950/80 text-amber-300 border border-amber-500/30 cursor-pointer" onclick="openSettingsModal()" title="Clicca per configurare credenziali Supabase">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                <span id="supabaseStatusText">Verifica Supabase...</span>
+              <span id="supabaseStatusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-950/50 cursor-pointer transition" onclick="openSettingsModal()" title="Clicca per configurare credenziali Supabase">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)] animate-pulse"></span>
+                <span id="supabaseStatusText">Supabase Live</span>
               </span>
             </div>
             <p class="text-xs text-slate-400">Sistema di Scommesse a Quota Dinamica & Gestione Multi-Ciclo</p>
@@ -757,16 +757,31 @@
             window.supabaseClient = supabaseClient;
             isSupabaseConnected = true;
 
-            // Sottoscrizione realtime ai cambiamenti di configurazione per sincronizzazione multi-dispositivo
+            // Sottoscrizione realtime ai cambiamenti per sincronizzazione multi-dispositivo istantanea
             try {
               supabaseClient
-                .channel('public-sync')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'config' }, () => {
-                  fetchSupabaseData();
+                .channel('martingala-multi-sync')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'config' }, async (payload) => {
+                  if (payload.new && payload.new.code === APP_STATE.config.code) {
+                    APP_STATE.config.cassa = Number(payload.new.cassa !== undefined ? payload.new.cassa : APP_STATE.config.cassa);
+                    APP_STATE.config.targetRevenuePct = Number(payload.new.target_revenue_pct !== undefined ? payload.new.target_revenue_pct : APP_STATE.config.targetRevenuePct);
+                    APP_STATE.config.perditaAccumulata = Number(payload.new.perdita_accumulata !== undefined ? payload.new.perdita_accumulata : APP_STATE.config.perditaAccumulata);
+                    APP_STATE.config.name = payload.new.name || APP_STATE.config.name;
+                    renderAll();
+                  }
+                  await fetchAllCyclesFromSupabase();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'history' }, async () => {
+                  await fetchHistoryForActiveCycle();
+                  renderAll();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, async () => {
+                  await fetchMatchesFromSupabase();
+                  renderAll();
                 })
                 .subscribe();
             } catch (subErr) {
-              console.warn('Realtime config channel warn:', subErr);
+              console.warn('Realtime multi-device sync warn:', subErr);
             }
 
             return supabaseClient;
@@ -1209,6 +1224,18 @@
           APP_STATE.config.name = `Ciclo ${cycleCode}`;
         }
 
+        // Segna questo ciclo come il più recentemente attivo su Supabase
+        if (supabaseClient) {
+          try {
+            await supabaseClient
+              .from('config')
+              .update({ updated_at: new Date().toISOString() })
+              .eq('code', cycleCode);
+          } catch (e) {
+            console.warn('Errore timestamp ciclo:', e);
+          }
+        }
+
         // Ricarica la tabella 'history' associata a quel codice specifico da Supabase
         await fetchHistoryForActiveCycle();
 
@@ -1221,6 +1248,7 @@
 
         showToast(`Ciclo "${APP_STATE.config.name}" (${cycleCode}) caricato con successo!`, 'success');
       };
+      window.caricaMartingala = window.loadMartingaleCycle;
 
       // Filtro ricerca cicli
       window.filterCyclesList = function() {
@@ -1816,52 +1844,11 @@
         }
       }
 
-      // Caricamento sincronizzato generale
-      async function fetchSupabaseData() {
-        if (!supabaseClient) {
-          isSupabaseConnected = false;
-          updateConnectionBadge(false, 'Locale (Cloud Ready)');
-          return;
-        }
+      // Caricamento partite completo da Supabase
+      async function fetchMatchesFromSupabase() {
+        if (!supabaseClient) return;
 
         try {
-          // 1. Trova il codice ciclo attivo
-          const activeCode = localStorage.getItem(KEY_ACTIVE_CODE);
-
-          let configRecord = null;
-          if (activeCode) {
-            const { data, error } = await supabaseClient
-              .from('config')
-              .select('*')
-              .eq('code', activeCode)
-              .maybeSingle();
-            if (data && !error) configRecord = data;
-          }
-
-          if (!configRecord) {
-            const { data, error } = await supabaseClient
-              .from('config')
-              .select('*')
-              .order('updated_at', { ascending: false })
-              .limit(1)
-              .maybeSingle();
-            if (data && !error) configRecord = data;
-          }
-
-          if (configRecord) {
-            APP_STATE.config.id = configRecord.id || configRecord.code;
-            APP_STATE.config.code = configRecord.code || APP_STATE.config.code;
-            APP_STATE.config.name = configRecord.name || `Ciclo ${APP_STATE.config.code}`;
-            if (configRecord.cassa !== undefined) APP_STATE.config.cassa = Number(configRecord.cassa);
-            if (configRecord.target_revenue_pct !== undefined) APP_STATE.config.targetRevenuePct = Number(configRecord.target_revenue_pct);
-            if (configRecord.perdita_accumulata !== undefined) APP_STATE.config.perditaAccumulata = Number(configRecord.perdita_accumulata);
-            localStorage.setItem(KEY_ACTIVE_CODE, APP_STATE.config.code);
-          } else {
-            // Se la tabella config non ha ancora questo ciclo, salvalo direttamente su Supabase
-            await syncConfigToSupabase();
-          }
-
-          // 2. Carica l'Elenco Partite (matches)
           const { data: matchesData, error: matchesErr } = await supabaseClient
             .from('matches')
             .select('*')
@@ -1881,21 +1868,81 @@
                 in_gioco: Boolean(m.in_gioco)
               }));
             } else if (APP_STATE.matches.length > 0) {
-              // Se la tabella su Supabase è vuota, sincronizza le partite correnti
+              // Se la tabella su Supabase è vuota, sincronizza il set iniziale
               for (const m of APP_STATE.matches) {
                 await syncMatchToSupabase(m);
               }
             }
           }
+        } catch (err) {
+          console.warn('Errore lettura matches da Supabase:', err);
+        }
+      }
+      window.fetchMatchesFromSupabase = fetchMatchesFromSupabase;
 
-          // 3. Carica lo Storico associato al ciclo attivo corrente
+      // Caricamento sincronizzato istantaneo da Supabase (Cloud Source of Truth)
+      async function fetchInitialCloudData() {
+        if (!supabaseClient) {
+          isSupabaseConnected = false;
+          updateConnectionBadge(false, 'Locale (Cloud Ready)');
+          return;
+        }
+
+        try {
+          // 4. INTERROGA SUBITO SUPABASE: query sulla tabella 'config' per recuperare l'ultimo record modificato/attivo
+          let configRecord = null;
+          try {
+            const { data: latestList, error: latestErr } = await supabaseClient
+              .from('config')
+              .select('*')
+              .order('updated_at', { ascending: false })
+              .limit(1);
+
+            if (!latestErr && Array.isArray(latestList) && latestList.length > 0) {
+              configRecord = latestList[0];
+            }
+          } catch (e) {
+            console.warn('Query order by updated_at:', e);
+          }
+
+          // Fallback se nessun record con updated_at ordinato
+          if (!configRecord) {
+            const { data: anyList } = await supabaseClient
+              .from('config')
+              .select('*')
+              .limit(1);
+            if (Array.isArray(anyList) && anyList.length > 0) {
+              configRecord = anyList[0];
+            }
+          }
+
+          if (configRecord) {
+            // 5. Imposta automaticamente il 'codice_database' trovato come codice attivo
+            const activeCode = configRecord.code || configRecord.id;
+            APP_STATE.config.id = activeCode;
+            APP_STATE.config.code = activeCode;
+            APP_STATE.config.name = configRecord.name || `Ciclo ${activeCode}`;
+            if (configRecord.cassa !== undefined) APP_STATE.config.cassa = Number(configRecord.cassa);
+            if (configRecord.target_revenue_pct !== undefined) APP_STATE.config.targetRevenuePct = Number(configRecord.target_revenue_pct);
+            if (configRecord.perdita_accumulata !== undefined) APP_STATE.config.perditaAccumulata = Number(configRecord.perdita_accumulata);
+            localStorage.setItem(KEY_ACTIVE_CODE, activeCode);
+          } else {
+            // Se la tabella config non ha ancora questo ciclo, salvalo direttamente su Supabase
+            await syncConfigToSupabase();
+          }
+
+          // 6. CARICA IMMEDIATAMENTE dalla tabella 'history' tutti i record associati a quel 'codice_database'
           await fetchHistoryForActiveCycle();
 
-          // 4. Carica l'elenco di tutti i cicli salvati
+          // 7. CARICA la tabella 'matches' (Elenco Partite) completa da Supabase
+          await fetchMatchesFromSupabase();
+
+          // 8. Carica l'elenco di tutti i cicli salvati per la modale
           await fetchAllCyclesFromSupabase();
 
           isSupabaseConnected = true;
           updateConnectionBadge(true, 'Supabase Live');
+          saveLocalBackup();
           renderAll();
         } catch (err) {
           console.warn('Avviso sincronizzazione Supabase:', err);
@@ -1908,6 +1955,8 @@
           }
         }
       }
+      window.fetchInitialCloudData = fetchInitialCloudData;
+      window.fetchSupabaseData = fetchInitialCloudData;
 
       // ==============================================================
       // RENDERIZZAZIONE COMPONENTI UI
@@ -2376,23 +2425,26 @@
         renderAll();
 
         // 2. Controllo credenziali nel localStorage
-        const savedUrl = localStorage.getItem(KEY_STORAGE_URL);
-        const savedKey = localStorage.getItem(KEY_STORAGE_KEY);
+        let savedUrl = localStorage.getItem(KEY_STORAGE_URL);
+        let savedKey = localStorage.getItem(KEY_STORAGE_KEY);
 
-        if (savedUrl && savedKey) {
-          initSupabase(savedUrl, savedKey);
-          isSupabaseConnected = true;
-          updateConnectionBadge(true, 'Supabase Live');
-        } else {
-          isSupabaseConnected = false;
-          updateConnectionBadge(false, 'Locale (Cloud Ready)');
-          openSettingsModal();
-          showToast('Configura Supabase inserendo URL e API Key', 'info');
+        // Se mancano (es. nuovo dispositivo smartphone o PC), usa e salva automaticamente
+        // le credenziali predefinite garantendo la sincronizzazione immediata tra dispositivi!
+        if (!savedUrl || !savedKey) {
+          savedUrl = DEFAULT_SUPABASE_URL;
+          savedKey = DEFAULT_SUPABASE_KEY;
+          localStorage.setItem(KEY_STORAGE_URL, savedUrl);
+          localStorage.setItem(KEY_STORAGE_KEY, savedKey);
         }
 
-        // 3. Sincronizzazione asincrona multi-ciclo con Supabase
+        // Inizializza client Supabase e imposta istantaneamente l'indicatore verde "Supabase Live"
+        initSupabase(savedUrl, savedKey);
+        isSupabaseConnected = true;
+        updateConnectionBadge(true, 'Supabase Live');
+
+        // 3. INTERROGA SUBITO SUPABASE: carica l'ultimo ciclo attivo, la relativa history e matches
         if (supabaseClient) {
-          await fetchSupabaseData();
+          await fetchInitialCloudData();
         }
 
         // 4. Toggle e form eventi
