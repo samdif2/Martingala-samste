@@ -1264,20 +1264,22 @@
           const { data, error } = await supabaseClient
             .from('config')
             .select('*')
-            .or(`codice_database.eq.${cycleCode},code.eq.${cycleCode}`)
-            .maybeSingle();
+            .eq('codice_database', cycleCode)
+            .order('id', { ascending: false })
+            .limit(1);
 
           if (error) {
             console.error('Errore SELECT config for cycle:', error);
-          } else if (data) {
+          } else if (Array.isArray(data) && data.length > 0) {
+            const rowData = data[0];
             selected = {
-              id: data.id,
-              codice_database: data.codice_database || data.code,
-              nome_martingala: data.nome_martingala || data.name || `Ciclo ${cycleCode}`,
-              cassa_attuale: data.cassa_attuale !== undefined ? Number(data.cassa_attuale) : (data.cassa !== undefined ? Number(data.cassa) : 100.00),
-              cassa_iniziale: data.cassa_iniziale !== undefined ? Number(data.cassa_iniziale) : 100.00,
-              percentuale_ricavo: data.percentuale_ricavo !== undefined ? Number(data.percentuale_ricavo) : 1.0,
-              perdita_accumulata: data.perdita_accumulata !== undefined ? Number(data.perdita_accumulata) : 0.00
+              id: rowData.id,
+              codice_database: rowData.codice_database || rowData.code,
+              nome_martingala: rowData.nome_martingala || rowData.name || `Ciclo ${cycleCode}`,
+              cassa_attuale: rowData.cassa_attuale !== undefined ? Number(rowData.cassa_attuale) : (rowData.cassa !== undefined ? Number(rowData.cassa) : 100.00),
+              cassa_iniziale: rowData.cassa_iniziale !== undefined ? Number(rowData.cassa_iniziale) : 100.00,
+              percentuale_ricavo: rowData.percentuale_ricavo !== undefined ? Number(rowData.percentuale_ricavo) : 1.0,
+              perdita_accumulata: rowData.perdita_accumulata !== undefined ? Number(rowData.perdita_accumulata) : 0.00
             };
           }
         }
@@ -1701,12 +1703,17 @@
         return false;
       }
 
-      // Aggiorna lo stato del ciclo attivo su Supabase
+      // Aggiorna lo stato del ciclo attivo su Supabase (SOLO UPDATE: NESSUN INSERT DI FALLBACK)
       async function syncConfigToSupabase() {
         saveLocalBackup();
         if (!supabaseClient) return;
 
         const activeCode = APP_STATE.config.codice_database;
+        if (!activeCode) {
+          console.warn('syncConfigToSupabase: codice_database non definito.');
+          return;
+        }
+
         console.log(`UPDATE config per codice_database = '${activeCode}'`);
 
         const updatePayload = {
@@ -1720,23 +1727,16 @@
           updated_at: new Date().toISOString()
         };
 
+        // Identifica in modo univoco il record da aggiornare tramite 'codice_database'
         const { error } = await supabaseClient
           .from('config')
           .update(updatePayload)
-          .or(`codice_database.eq.${activeCode},code.eq.${activeCode}`);
+          .eq('codice_database', activeCode);
 
         if (error) {
-          console.error('Errore UPDATE config su Supabase:', error);
-          // Se non esisteva, tentiamo un insert pulito senza id
-          await insertConfigToSupabase({
-            codice_database: activeCode,
-            nome_martingala: APP_STATE.config.nome_martingala,
-            cassa_iniziale: Number(APP_STATE.config.cassa_attuale),
-            cassa_attuale: Number(APP_STATE.config.cassa_attuale),
-            percentuale_ricavo: Number(APP_STATE.config.percentuale_ricavo)
-          });
+          console.error(`Errore UPDATE config per codice '${activeCode}' su Supabase:`, error);
         } else {
-          console.log('Tabella config aggiornata con successo!');
+          console.log(`Tabella config aggiornata con successo per codice '${activeCode}'!`);
         }
       }
 
@@ -1932,7 +1932,22 @@
         }
 
         if (Array.isArray(data) && data.length > 0) {
-          APP_STATE.allCycles = data.map(c => {
+          // De-duplicazione per 'codice_database': manteniamo solo il record più recente
+          // (il primo incontrato, poiché la query ordina con 'id DESC')
+          const seenCodes = new Set();
+          const uniqueRows = [];
+
+          for (const item of data) {
+            const code = item.codice_database || item.code || String(item.id);
+            if (code && !seenCodes.has(code)) {
+              seenCodes.add(code);
+              uniqueRows.push(item);
+            }
+          }
+
+          console.log(`Martingale caricate: ${data.length} totali nel DB -> ${uniqueRows.length} cicli univoci.`);
+
+          APP_STATE.allCycles = uniqueRows.map(c => {
             const code = c.codice_database || c.code || String(c.id);
             const name = c.nome_martingala || c.name || `Ciclo ${code}`;
             const cassa = c.cassa_attuale !== undefined ? Number(c.cassa_attuale) : (c.cassa !== undefined ? Number(c.cassa) : 100.00);
@@ -2264,7 +2279,16 @@
         const badge = document.getElementById('cyclesCountBadge');
         if (!container) return;
 
-        let list = [...APP_STATE.allCycles];
+        // De-duplicazione difensiva per codice_database
+        const seen = new Set();
+        let list = [];
+        for (const c of APP_STATE.allCycles) {
+          const code = c.codice_database || c.code;
+          if (code && !seen.has(code)) {
+            seen.add(code);
+            list.push(c);
+          }
+        }
 
         if (filterQuery) {
           const q = filterQuery.toLowerCase();
