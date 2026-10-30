@@ -1133,33 +1133,95 @@
         document.getElementById('confirmResetModal').classList.add('hidden');
       };
 
+      /**
+       * Inserisce un nuovo record nella tabella 'config' di Supabase.
+       * REGOLE TASSATIVE APPLICATE:
+       * 1. NON include MAI la chiave 'id' nell'oggetto JSON inviato a Supabase.
+       * 2. Invia SOLO i campi necessari:
+       *    {
+       *      codice_database: nuovoCodice,
+       *      nome_martingala: nuovoNome,
+       *      cassa_iniziale: cassaIniziale,
+       *      cassa_attuale: cassaIniziale,
+       *      percentuale_ricavo: percentualeRicavo
+       *    }
+       * 3. Lascia che sia Supabase / PostgreSQL a gestire l'autoincremento della chiave primaria 'id'.
+       * 4. Se la sequenza interna di PostgreSQL è disallineata con ID inseriti in precedenza
+       *    (errore "duplicate key value violates unique constraint config_pkey"),
+       *    un ciclo di retry ripete l'insert senza id: ogni tentativo avanza automaticamente
+       *    nextval('config_id_seq') fino a superare le chiavi esistenti ed eseguire l'inserimento.
+       * 5. Restituisce il nuovo record creato (.select()).
+       */
+      async function insertConfigToSupabase(payload) {
+        if (!supabaseClient) {
+          return { data: null, error: new Error('Client Supabase non inizializzato') };
+        }
+
+        // Costruzione rigorosa: SOLO i campi necessari, MAI la chiave 'id'
+        const cleanPayload = {
+          codice_database: String(payload.codice_database).trim(),
+          nome_martingala: String(payload.nome_martingala).trim(),
+          cassa_iniziale: Number(payload.cassa_iniziale !== undefined ? payload.cassa_iniziale : (payload.cassa_attuale || 100.00)),
+          cassa_attuale: Number(payload.cassa_attuale !== undefined ? payload.cassa_attuale : 100.00),
+          percentuale_ricavo: Number(payload.percentuale_ricavo !== undefined ? payload.percentuale_ricavo : 1.0)
+        };
+        delete cleanPayload.id;
+
+        console.log('Esecuzione INSERT su tabella config (senza chiave id):', cleanPayload);
+
+        let lastError = null;
+        for (let attempt = 1; attempt <= 30; attempt++) {
+          const { data, error } = await supabaseClient
+            .from('config')
+            .insert([cleanPayload])
+            .select();
+
+          if (!error && Array.isArray(data) && data.length > 0) {
+            console.log(`Record inserito con successo su config (tentativo ${attempt}):`, data[0]);
+            return { data: data[0], error: null };
+          }
+
+          lastError = error;
+          const msg = error ? (error.message || '') : '';
+          console.warn(`Tentativo ${attempt}/30 INSERT config:`, msg);
+
+          const isPkeyCollision = msg.includes('config_pkey') || msg.includes('duplicate key');
+          if (!isPkeyCollision) {
+            // Errore non relativo alla sequenza autoincrementale di 'id'
+            break;
+          }
+          // Breve delay per far avanzare la sequenza
+          await new Promise(r => setTimeout(r, 40));
+        }
+
+        return { data: null, error: lastError };
+      }
+      window.insertConfigToSupabase = insertConfigToSupabase;
+
       window.confirmResetMartingale = async function() {
         const newCode = document.getElementById('previewNextCycleCode').textContent || generateUniqueDatabaseCode();
         const newName = `Ciclo ${newCode}`;
         const cassa = Number(APP_STATE.config.cassa_iniziale || APP_STATE.config.cassa_attuale || 100.00);
         const percentuale = Number(APP_STATE.config.percentuale_ricavo || 1.0);
 
-        // 1. Esegui la vera chiamata INSERT su Supabase (nessun upsert/update con id fisso!)
+        let createdRecord = null;
+
+        // 1. Esegui la vera chiamata INSERT su Supabase SENZA MAI inviare la chiave 'id'
         if (supabaseClient) {
-          const insertPayload = {
+          const { data, error } = await insertConfigToSupabase({
             codice_database: newCode,
             nome_martingala: newName,
             cassa_iniziale: cassa,
             cassa_attuale: cassa,
             percentuale_ricavo: percentuale
-          };
-
-          console.log('Esecuzione INSERT su tabella config:', insertPayload);
-          const { data, error } = await supabaseClient
-            .from('config')
-            .insert([insertPayload])
-            .select();
+          });
 
           if (error) {
             console.error('Errore INSERT nuova martingala:', error);
             showToast('Errore creazione ciclo su Supabase: ' + error.message, 'error');
           } else {
-            console.log('Nuova martingala inserita nel Table Editor di Supabase:', data);
+            createdRecord = data;
+            console.log('Nuova martingala inserita e restituita da Supabase:', createdRecord);
             showToast(`Nuova Martingala ${newCode} inserita nel database!`, 'success');
           }
         }
@@ -1672,18 +1734,14 @@
 
         if (error) {
           console.error('Errore UPDATE config su Supabase:', error);
-          // Se non esisteva, tentiamo un insert
-          const insertPayload = {
+          // Se non esisteva, tentiamo un insert pulito senza id
+          await insertConfigToSupabase({
             codice_database: activeCode,
             nome_martingala: APP_STATE.config.nome_martingala,
             cassa_iniziale: Number(APP_STATE.config.cassa_attuale),
             cassa_attuale: Number(APP_STATE.config.cassa_attuale),
             percentuale_ricavo: Number(APP_STATE.config.percentuale_ricavo)
-          };
-          const { error: insErr } = await supabaseClient.from('config').insert([insertPayload]);
-          if (insErr) {
-            console.error('Errore INSERT fallback config:', insErr);
-          }
+          });
         } else {
           console.log('Tabella config aggiornata con successo!');
         }
@@ -1948,14 +2006,13 @@
         } else {
           // Tabella config vuota: inserimento del ciclo di base M1-2026
           console.log('Nessun record in config. Inserimento ciclo iniziale M1-2026...');
-          const initPayload = {
+          const { data: insData, error: insErr } = await insertConfigToSupabase({
             codice_database: 'M1-2026',
             nome_martingala: 'Ciclo Principale',
             cassa_iniziale: 100.00,
             cassa_attuale: 100.00,
             percentuale_ricavo: 1.0
-          };
-          const { data: insData, error: insErr } = await supabaseClient.from('config').insert([initPayload]).select();
+          });
           if (insErr) {
             console.error('Errore creazione ciclo iniziale:', insErr);
           } else {
