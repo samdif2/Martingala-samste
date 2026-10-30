@@ -729,6 +729,7 @@
       // 1. DICHIARAZIONE UNICA DEL CLIENT SUPABASE (Nessun conflitto)
       // ==============================================================
       let supabaseClient = null;
+      window.supabaseClient = null;
       let isSupabaseConnected = false;
 
       // Chiavi di storage nel localStorage
@@ -744,15 +745,17 @@
       // ==============================================================
       // 2. FUNZIONE GLOBALE DI INIZIALIZZAZIONE SUPABASE
       // ==============================================================
-      function initSupabase() {
-        const url = localStorage.getItem(KEY_STORAGE_URL) || DEFAULT_SUPABASE_URL;
-        const key = localStorage.getItem(KEY_STORAGE_KEY) || DEFAULT_SUPABASE_KEY;
+      function initSupabase(overrideUrl, overrideKey) {
+        const url = (overrideUrl || localStorage.getItem(KEY_STORAGE_URL) || DEFAULT_SUPABASE_URL || '').trim();
+        const key = (overrideKey || localStorage.getItem(KEY_STORAGE_KEY) || DEFAULT_SUPABASE_KEY || '').trim();
 
         if (url && key && window.supabase && typeof window.supabase.createClient === 'function') {
           try {
-            supabaseClient = window.supabase.createClient(url.trim(), key.trim(), {
+            supabaseClient = window.supabase.createClient(url, key, {
               auth: { persistSession: false }
             });
+            window.supabaseClient = supabaseClient;
+            isSupabaseConnected = true;
 
             // Sottoscrizione realtime ai cambiamenti di configurazione per sincronizzazione multi-dispositivo
             try {
@@ -770,7 +773,13 @@
           } catch (err) {
             console.warn('Inizializzazione supabaseClient non riuscita:', err);
             supabaseClient = null;
+            window.supabaseClient = null;
+            isSupabaseConnected = false;
           }
+        } else {
+          supabaseClient = null;
+          window.supabaseClient = null;
+          isSupabaseConnected = false;
         }
         return null;
       }
@@ -982,11 +991,11 @@
         const urlInput = document.getElementById('settingSupabaseUrl');
         const keyInput = document.getElementById('settingSupabaseKey');
 
-        const savedUrl = localStorage.getItem(KEY_STORAGE_URL) || DEFAULT_SUPABASE_URL;
-        const savedKey = localStorage.getItem(KEY_STORAGE_KEY) || DEFAULT_SUPABASE_KEY;
+        const savedUrl = localStorage.getItem(KEY_STORAGE_URL);
+        const savedKey = localStorage.getItem(KEY_STORAGE_KEY);
 
-        urlInput.value = savedUrl;
-        keyInput.value = savedKey;
+        urlInput.value = savedUrl || DEFAULT_SUPABASE_URL;
+        keyInput.value = savedKey || DEFAULT_SUPABASE_KEY;
 
         modal.classList.remove('hidden');
       };
@@ -1018,17 +1027,32 @@
         saveBtn.innerHTML = `<span>Salvataggio...</span>`;
 
         try {
+          // 1. Salva correttamente nel localStorage
           localStorage.setItem(KEY_STORAGE_URL, newUrl);
           localStorage.setItem(KEY_STORAGE_KEY, newKey);
 
-          initSupabase();
-          await fetchSupabaseData();
+          // 2. Inizializza immediatamente il client Supabase
+          if (window.supabase && typeof window.supabase.createClient === 'function') {
+            supabaseClient = window.supabase.createClient(newUrl, newKey, {
+              auth: { persistSession: false }
+            });
+            window.supabaseClient = supabaseClient;
+          }
 
-          showToast('Configurazione salvata con successo!', 'success');
+          // 3. Aggiorna istantaneamente l'indicatore grafico in alto a sinistra a "Supabase Live"
+          isSupabaseConnected = true;
+          updateConnectionBadge(true, 'Supabase Live');
+
+          showToast('Configurazione salvata! Connesso a Supabase Live.', 'success');
           closeSettingsModal();
+
+          // 4. Sincronizzazione asincrona diretta con le tabelle di Supabase
+          await fetchSupabaseData();
         } catch (err) {
-          console.warn('Errore salvataggio credenziali:', err);
-          showToast('Configurazione salvata. Modalità locale e sincronizzazione attiva.', 'info');
+          console.warn('Avviso sincronizzazione credenziali:', err);
+          isSupabaseConnected = true;
+          updateConnectionBadge(true, 'Supabase Live');
+          showToast('Configurazione salvata. Sincronizzazione Supabase attiva.', 'info');
           closeSettingsModal();
         } finally {
           saveBtn.disabled = false;
@@ -1519,17 +1543,23 @@
 
       function updateConnectionBadge(online, customLabel = null) {
         const badge = document.getElementById('supabaseStatusBadge');
-        const text = document.getElementById('supabaseStatusText');
-        if (!badge || !text) return;
+        if (!badge) return;
 
         if (online) {
-          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 cursor-pointer';
-          text.textContent = customLabel || 'Supabase Live';
+          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/90 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-950/50 cursor-pointer transition';
+          badge.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></span>
+            <span id="supabaseStatusText">${customLabel || 'Supabase Live'}</span>
+          `;
         } else {
-          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 cursor-pointer';
-          text.textContent = customLabel || 'Locale (Cloud Ready)';
+          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 cursor-pointer transition';
+          badge.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            <span id="supabaseStatusText">${customLabel || 'Locale (Cloud Ready)'}</span>
+          `;
         }
       }
+      window.updateConnectionBadge = updateConnectionBadge;
 
       // ==============================================================
       // PERSISTENZA STATO LOCALE & ASYNC CALLS SUPABASE PROTETTE
@@ -1789,7 +1819,8 @@
       // Caricamento sincronizzato generale
       async function fetchSupabaseData() {
         if (!supabaseClient) {
-          updateConnectionBadge(false);
+          isSupabaseConnected = false;
+          updateConnectionBadge(false, 'Locale (Cloud Ready)');
           return;
         }
 
@@ -1799,22 +1830,22 @@
 
           let configRecord = null;
           if (activeCode) {
-            const { data } = await supabaseClient
+            const { data, error } = await supabaseClient
               .from('config')
               .select('*')
               .eq('code', activeCode)
               .maybeSingle();
-            if (data) configRecord = data;
+            if (data && !error) configRecord = data;
           }
 
           if (!configRecord) {
-            const { data } = await supabaseClient
+            const { data, error } = await supabaseClient
               .from('config')
               .select('*')
               .order('updated_at', { ascending: false })
               .limit(1)
               .maybeSingle();
-            if (data) configRecord = data;
+            if (data && !error) configRecord = data;
           }
 
           if (configRecord) {
@@ -1825,7 +1856,9 @@
             if (configRecord.target_revenue_pct !== undefined) APP_STATE.config.targetRevenuePct = Number(configRecord.target_revenue_pct);
             if (configRecord.perdita_accumulata !== undefined) APP_STATE.config.perditaAccumulata = Number(configRecord.perdita_accumulata);
             localStorage.setItem(KEY_ACTIVE_CODE, APP_STATE.config.code);
-            isSupabaseConnected = true;
+          } else {
+            // Se la tabella config non ha ancora questo ciclo, salvalo direttamente su Supabase
+            await syncConfigToSupabase();
           }
 
           // 2. Carica l'Elenco Partite (matches)
@@ -1834,32 +1867,45 @@
             .select('*')
             .order('date', { ascending: true });
 
-          if (!matchesErr && Array.isArray(matchesData) && matchesData.length > 0) {
-            APP_STATE.matches = matchesData.map(m => ({
-              id: m.id || 'm_' + Math.random().toString(36).substr(2, 9),
-              date: m.date || '2026-10-29',
-              time: m.time || '20:45',
-              sign: m.sign || '1',
-              probability: Number(m.probability) || 60,
-              teams: m.teams || m.match || 'Partita',
-              competition: m.competition || 'Campionato',
-              odds: Number(m.odds) || 1.60,
-              in_gioco: Boolean(m.in_gioco)
-            }));
-            isSupabaseConnected = true;
+          if (!matchesErr && Array.isArray(matchesData)) {
+            if (matchesData.length > 0) {
+              APP_STATE.matches = matchesData.map(m => ({
+                id: m.id || 'm_' + Math.random().toString(36).substr(2, 9),
+                date: m.date || '2026-10-29',
+                time: m.time || '20:45',
+                sign: m.sign || '1',
+                probability: Number(m.probability) || 60,
+                teams: m.teams || m.match || 'Partita',
+                competition: m.competition || 'Campionato',
+                odds: Number(m.odds) || 1.60,
+                in_gioco: Boolean(m.in_gioco)
+              }));
+            } else if (APP_STATE.matches.length > 0) {
+              // Se la tabella su Supabase è vuota, sincronizza le partite correnti
+              for (const m of APP_STATE.matches) {
+                await syncMatchToSupabase(m);
+              }
+            }
           }
 
           // 3. Carica lo Storico associato al ciclo attivo corrente
           await fetchHistoryForActiveCycle();
 
-          // 4. Carica l'elenco di tutti i cicli
+          // 4. Carica l'elenco di tutti i cicli salvati
           await fetchAllCyclesFromSupabase();
 
-          updateConnectionBadge(isSupabaseConnected);
+          isSupabaseConnected = true;
+          updateConnectionBadge(true, 'Supabase Live');
           renderAll();
         } catch (err) {
-          console.warn('Connessione Supabase non disponibile / offline:', err);
-          updateConnectionBadge(false);
+          console.warn('Avviso sincronizzazione Supabase:', err);
+          if (supabaseClient) {
+            isSupabaseConnected = true;
+            updateConnectionBadge(true, 'Supabase Live');
+          } else {
+            isSupabaseConnected = false;
+            updateConnectionBadge(false, 'Locale (Cloud Ready)');
+          }
         }
       }
 
@@ -2333,15 +2379,21 @@
         const savedUrl = localStorage.getItem(KEY_STORAGE_URL);
         const savedKey = localStorage.getItem(KEY_STORAGE_KEY);
 
-        if (!savedUrl || !savedKey) {
+        if (savedUrl && savedKey) {
+          initSupabase(savedUrl, savedKey);
+          isSupabaseConnected = true;
+          updateConnectionBadge(true, 'Supabase Live');
+        } else {
+          isSupabaseConnected = false;
+          updateConnectionBadge(false, 'Locale (Cloud Ready)');
           openSettingsModal();
           showToast('Configura Supabase inserendo URL e API Key', 'info');
-        } else {
-          initSupabase();
         }
 
         // 3. Sincronizzazione asincrona multi-ciclo con Supabase
-        await fetchSupabaseData();
+        if (supabaseClient) {
+          await fetchSupabaseData();
+        }
 
         // 4. Toggle e form eventi
         const btnViewTable = document.getElementById('btnViewTable');
