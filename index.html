@@ -1997,20 +1997,33 @@
           localStorage.setItem(KEY_ACTIVE_CODE, activeCode);
           console.log(`Impostato ciclo attivo ${activeCode} da Supabase`);
         } else {
-          // Tabella config vuota: inserimento del ciclo di base M1-2026
-          console.log('Nessun record in config. Inserimento ciclo iniziale M1-2026...');
-          const { data: insData, error: insErr } = await insertConfigToSupabase({
-            codice_database: 'M1-2026',
-            nome_martingala: 'Ciclo Principale',
-            cassa_iniziale: 100.00,
-            cassa_attuale: 100.00,
-            percentuale_ricavo: 1.0
-          });
-          if (insErr) {
-            console.error('Errore creazione ciclo iniziale:', insErr);
-          } else {
-            console.log('Ciclo iniziale creato con successo:', insData);
+          // Tabella config vuota: inserimento pulito diretto senza campo id
+          console.log('Nessun record in config. Inserimento ciclo iniziale M1-2026 (autoincrement nativo, senza id)...');
+          try {
+            const { data: insData, error: insErr } = await supabaseClient.from('config').insert([{
+              codice_database: 'M1-2026',
+              nome_martingala: 'Ciclo Principale',
+              cassa_iniziale: 100.00,
+              cassa_attuale: 100.00,
+              percentuale_ricavo: 1.0
+            }]).select();
+
+            if (insErr) {
+              console.error('Errore creazione ciclo iniziale M1-2026:', insErr);
+            } else {
+              console.log('Ciclo iniziale M1-2026 creato con successo su Supabase:', insData);
+            }
+          } catch (err) {
+            console.error('Eccezione inserimento ciclo iniziale:', err);
           }
+
+          APP_STATE.config.codice_database = 'M1-2026';
+          APP_STATE.config.nome_martingala = 'Ciclo Principale';
+          APP_STATE.config.cassa_attuale = 100.00;
+          APP_STATE.config.cassa_iniziale = 100.00;
+          APP_STATE.config.percentuale_ricavo = 1.0;
+          APP_STATE.config.perdita_accumulata = 0.00;
+          localStorage.setItem(KEY_ACTIVE_CODE, 'M1-2026');
         }
 
         // Carica la cronologia del ciclo attivo
