@@ -95,9 +95,10 @@
               <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
                 MARTINGALA PRO
               </h1>
-              <span id="supabaseStatusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-950/50 cursor-pointer transition" onclick="openSettingsModal()" title="Clicca per configurare credenziali Supabase">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)] animate-pulse"></span>
-                <span id="supabaseStatusText">Supabase Live</span>
+              <!-- Indicatore di Connessione: mostra Supabase Live SOLO se connesso con successo -->
+              <span id="supabaseStatusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700 cursor-pointer transition" onclick="openSettingsModal()" title="Clicca per configurare credenziali Supabase">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span id="supabaseStatusText">Verifica Supabase...</span>
               </span>
             </div>
             <p class="text-xs text-slate-400">Sistema di Scommesse a Quota Dinamica & Gestione Multi-Ciclo</p>
@@ -212,7 +213,7 @@
             </div>
           </div>
 
-          <!-- 1. MODIFICA: Nome Martingala (EDITABILE) & Codice Database (SOLO LETTURA) -->
+          <!-- Nome Martingala (EDITABILE) & Codice Database (SOLO LETTURA) -->
           <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
             <div class="flex justify-between items-center mb-1.5">
               <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
@@ -262,7 +263,7 @@
             <h2 class="text-base font-bold text-slate-100 flex items-center gap-2">
               Tabella Martingala Attiva
               <span class="text-xs font-normal text-slate-400 font-numeric">
-                (Ord. decrescente: nuova partita in cima)
+                (Nuova partita in cima — congelate sotto)
               </span>
             </h2>
           </div>
@@ -351,7 +352,7 @@
                 <h3 class="text-base font-bold text-white">Elenco Martingala</h3>
                 <span id="cyclesCountBadge" class="bg-cyan-950 text-cyan-300 border border-cyan-800/50 text-xs px-2.5 py-0.5 rounded-full font-mono">0 salvati</span>
               </div>
-              <p class="text-xs text-slate-400">Storico dei cicli sincronizzati su Supabase con caricamento immediato</p>
+              <p class="text-xs text-slate-400">Tutti i cicli memorizzati nel database Supabase</p>
             </div>
           </div>
 
@@ -385,12 +386,12 @@
 
         <!-- Contenitore Lista Card Cicli Martingala -->
         <div id="cyclesCardsContainer" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3">
-          <!-- Renderizzato dinamicamente via JS -->
+          <!-- Renderizzato dinamicamente via JS (tutti i record da config) -->
         </div>
 
         <!-- Footer Modale Cicli -->
         <div class="bg-slate-850 px-5 py-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-          <span>Seleziona un ciclo e clicca <strong class="text-blue-400 font-semibold">Carica ➔</strong> per sincronizzarlo sulla tua Home</span>
+          <span>Seleziona una Martingala e clicca <strong class="text-blue-400 font-semibold">Carica ➔</strong> per sincronizzarla</span>
           <span class="font-mono text-slate-500">Database Table: <code class="text-cyan-400">config</code> / <code class="text-cyan-400">history</code></span>
         </div>
 
@@ -518,46 +519,46 @@
 
         <!-- Legenda Colori Squadre (Probabilità) -->
         <div class="bg-slate-950/70 px-5 py-2 border-b border-slate-800/80 flex items-center gap-3 flex-wrap text-[11px] text-slate-400">
-          <span class="font-semibold text-slate-300">Colore Nomi Squadre (Probabilità):</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-400"></span> &lt; 62% (Grigio)</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-white"></span> 62% - 64% (Bianco)</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-400"></span> 64% - 66% (Giallo)</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> 66% - 68% (Azzurro)</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> &ge; 68% (Verde)</span>
+          <span class="font-semibold text-slate-300">Fasce Probabilità:</span>
+          <span class="inline-flex items-center gap-1 text-slate-400"><span>&lt; 62%</span> (Normale)</span>
+          <span class="inline-flex items-center gap-1 text-white font-medium"><span>62-64%</span> (Buona)</span>
+          <span class="inline-flex items-center gap-1 text-yellow-400 font-semibold"><span>64-66%</span> (Ottima)</span>
+          <span class="inline-flex items-center gap-1 text-cyan-400 font-semibold"><span>66-68%</span> (Forte)</span>
+          <span class="inline-flex items-center gap-1 text-emerald-400 font-bold"><span>&ge; 68%</span> (Altissima)</span>
         </div>
 
-        <!-- Form Rapido Inserimento Nuova Partita -->
-        <div id="newMatchFormContainer" class="hidden bg-slate-850 p-4 border-b border-slate-800">
-          <form id="newMatchForm" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 items-end">
+        <!-- Form Rapido Inserimento Partita (Nascosto per default) -->
+        <div id="newMatchFormContainer" class="hidden bg-slate-950/90 border-b border-slate-800 p-4 transition-all">
+          <form id="newMatchForm" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 items-end">
             <div>
-              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Data</label>
+              <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Data</label>
               <input id="newMatchDate" type="date" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
             </div>
             <div>
-              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Ora</label>
-              <input id="newMatchTime" type="time" required value="20:45" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+              <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Ora</label>
+              <input id="newMatchTime" type="time" value="20:45" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
             </div>
             <div>
-              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Segno</label>
-              <input id="newMatchSign" type="text" required placeholder="Es. 1, Over 1.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+              <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Segno</label>
+              <input id="newMatchSign" type="text" placeholder="es. 1X o Over 1.5" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white font-mono">
             </div>
             <div>
-              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Probabilità %</label>
-              <input id="newMatchProb" type="number" step="0.1" min="1" max="100" required placeholder="65.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+              <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Probabilità %</label>
+              <input id="newMatchProb" type="number" step="0.1" min="1" max="100" placeholder="65.5" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white font-numeric">
             </div>
-            <div class="sm:col-span-2">
-              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Squadra A - Squadra B</label>
-              <input id="newMatchTeams" type="text" required placeholder="Inter - Juventus" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
-            </div>
-            <div>
-              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Competizione</label>
-              <input id="newMatchComp" type="text" required placeholder="Serie A" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+            <div class="col-span-2">
+              <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Squadre</label>
+              <input id="newMatchTeams" type="text" placeholder="Squadra A - Squadra B" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
             </div>
             <div>
-              <label class="block text-[10px] font-semibold text-slate-400 uppercase">Quota</label>
-              <div class="flex gap-1.5">
-                <input id="newMatchOdds" type="number" step="0.01" min="1.01" required placeholder="1.62" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-numeric font-bold text-emerald-400">
-                <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow">
+              <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Campionato</label>
+              <input id="newMatchComp" type="text" placeholder="Serie A" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Quota</label>
+              <div class="flex items-center gap-1.5">
+                <input id="newMatchOdds" type="number" step="0.01" min="1.01" max="99" placeholder="1.60" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-amber-300 font-numeric font-bold">
+                <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow flex-shrink-0">
                   Aggiungi
                 </button>
               </div>
@@ -565,152 +566,151 @@
           </form>
         </div>
 
-        <!-- CONTENUTO MODALE: TABELLA O TESTO -->
-        <div class="flex-1 overflow-hidden relative">
+        <!-- Vista 1: Tabella Partite -->
+        <div id="matchesTableView" class="flex-1 overflow-y-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="sticky top-0 bg-slate-950/95 backdrop-blur-sm text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-800 z-10 shadow-sm">
+              <tr>
+                <th class="py-3 px-3">Data</th>
+                <th class="py-3 px-2 text-center">Ora</th>
+                <th class="py-3 px-2 text-center">Segno</th>
+                <th class="py-3 px-3 text-center">Probabilità</th>
+                <th class="py-3 px-4">Squadre</th>
+                <th class="py-3 px-3 text-center">Campionato</th>
+                <th class="py-3 px-3 text-center">Quota</th>
+                <th class="py-3 px-3 text-center">Value Edge</th>
+                <th class="py-3 px-3 text-center">Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="matchesTableBody" class="divide-y divide-slate-800/60 font-medium">
+              <!-- Righe dinamiche delle partite -->
+            </tbody>
+          </table>
+        </div>
 
-          <!-- 1. VISTA TABELLA -->
-          <div id="matchesTableView" class="h-full overflow-y-auto">
-            <table class="w-full text-left text-xs border-collapse">
-              <thead class="sticky top-0 z-10 bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-800 text-[11px]">
-                <tr>
-                  <th class="py-3 px-3 w-28">Data</th>
-                  <th class="py-3 px-2 w-16 text-center">Ora</th>
-                  <th class="py-3 px-2 w-16 text-center">Segno</th>
-                  <th class="py-3 px-3 w-24 text-center">Probabilità %</th>
-                  <th class="py-3 px-4 min-w-[260px]">Squadra A - Squadra B</th>
-                  <th class="py-3 px-3 min-w-[160px] text-center">Competizione</th>
-                  <th class="py-3 px-3 w-24 text-center">Quota</th>
-                  <th class="py-3 px-3 w-28 text-center">Value Edge %</th>
-                  <th class="py-3 px-3 w-28 text-center">Azioni</th>
-                </tr>
-              </thead>
-              <tbody id="matchesTableBody" class="divide-y divide-slate-800/80">
-                <!-- Popolato via JS -->
-              </tbody>
-            </table>
-          </div>
-
-          <!-- 2. VISTA TESTO (TEXTAREA TSV) -->
-          <div id="matchesTextView" class="hidden h-full flex flex-col p-4 bg-slate-950">
-            <div class="flex items-center justify-between pb-3 text-xs text-slate-400">
-              <p>Formato colonne (separate da <code class="text-amber-400 font-bold font-mono">TAB reale</code>): Data | Ora | Segno | Probabilità% | Squadra A - Squadra B | Competizione | Quota | Value Edge% | Stato</p>
-              <div class="flex items-center gap-2">
-                <button id="btnCopyAllMatchesTSV" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 transition">
-                  <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
-                  </svg>
-                  <span>Copia Tutto TSV</span>
-                </button>
-                <button id="btnSaveMatchesFromText" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-1.5 rounded-lg shadow transition">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span>Aggiorna da Testo (Salva)</span>
-                </button>
-              </div>
+        <!-- Vista 2: Testo TSV / Importazione Veloce -->
+        <div id="matchesTextView" class="hidden flex-1 flex flex-col p-4 space-y-3">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Incolla o modifica qui l'elenco in formato tabellare (campi separati da <strong>TAB</strong>):</span>
+            <div class="flex items-center gap-2">
+              <button id="btnCopyAllMatchesTSV" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold">
+                Copia Tutto (TSV)
+              </button>
+              <button id="btnSaveMatchesFromText" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow">
+                Salva Modifiche da Testo
+              </button>
             </div>
-            <textarea id="matchesRawTextarea" spellcheck="false" class="flex-1 w-full bg-slate-900 text-slate-100 font-mono text-xs p-4 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500 leading-relaxed resize-none" placeholder="Data	Ora	Segno	Prob%	Partita	Competizione	Quota	Value Edge%"></textarea>
           </div>
+          <textarea id="matchesRawTextarea" class="flex-1 w-full bg-slate-950 font-mono text-xs text-slate-200 p-4 border border-slate-800 rounded-xl focus:outline-none focus:border-cyan-500 leading-relaxed resize-none selection:bg-cyan-600 selection:text-white" spellcheck="false" placeholder="Data	Ora	Segno	Probabilità%	Squadra A - Squadra B	Competizione	Quota	Value Edge%	Stato"></textarea>
+        </div>
 
+        <!-- Footer Modale Partite -->
+        <div class="bg-slate-850 px-5 py-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+          <span>Premi il tasto verde <strong class="text-emerald-400 font-bold">+</strong> a fianco di una partita per inserirla nella prima riga della Martingala</span>
+          <span class="font-mono text-slate-500">Database Table: <code class="text-emerald-400">matches</code></span>
         </div>
 
       </div>
     </div>
 
     <!-- ============================================================== -->
-    <!-- 6. MODALE SIMULAZIONE ERRORI RESIDUI                            -->
+    <!-- MODALE DI CONFERMA "NUOVA MARTINGALA"                          -->
     <!-- ============================================================== -->
-    <div id="simulationModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
-      <div class="bg-slate-900 border border-amber-500/40 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
+    <div id="confirmResetModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
+      <div class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-4 animate-fadeIn">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg flex-shrink-0">
+            ⚠️
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Avviare Nuova Martingala?</h3>
+            <p class="text-xs text-slate-400">Verrà creato un nuovo record autonomo nel database Supabase.</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400">Nuovo Codice Generato:</span>
+            <span id="previewNextCycleCode" class="font-mono font-bold text-amber-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">M2-2026</span>
+          </div>
+          <div class="text-slate-400 text-[11px] leading-relaxed">
+            • La tabella visibile verrà azzerata per il nuovo ciclo.<br>
+            • L'<strong>Elenco Partite rimarrà intatto</strong> e disponibile.<br>
+            • Il ciclo corrente rimarrà salvato e consultabile in <em>Elenco Martingala</em>.
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button onclick="closeResetModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+            Annulla
+          </button>
+          <button onclick="confirmResetMartingale()" class="px-5 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-950/40 transition active:scale-95">
+            Sì, Avvia Nuovo Ciclo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- MODALE SIMULAZIONE ERRORI RESIDUI                              -->
+    <!-- ============================================================== -->
+    <div id="simulationModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
+      <div class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
         <div class="bg-slate-850 px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
+              📊
             </div>
             <div>
-              <h3 class="text-base font-bold text-white">Simulazione Geometrica Errori Residui</h3>
-              <p class="text-xs text-slate-400">Analisi di sostenibilità bankroll prima del fallimento</p>
+              <h3 class="text-sm font-bold text-white">Simulazione Sequenza Errori Residui</h3>
+              <p class="text-xs text-slate-400">Quante perdite consecutive può sopportare la cassa attuale</p>
             </div>
           </div>
-          <button id="btnCloseSimulationModal" onclick="closeSimulationModal()" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">
+          <button onclick="closeSimulationModal()" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-800 transition">
             ✕
           </button>
         </div>
 
-        <div class="p-5 overflow-y-auto space-y-4">
-          <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800 text-xs space-y-1.5 text-slate-300">
-            <div class="flex justify-between">
-              <span class="text-slate-400">Cassa Base Analizzata:</span>
-              <span id="simCassaValue" class="font-numeric font-bold text-emerald-400">100,00 €</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-400">Quota Base di Simulazione:</span>
-              <span id="simQuotaValue" class="font-numeric font-bold text-slate-200">1.60</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-400">% Ricavo Prevista:</span>
-              <span id="simRevenueValue" class="font-numeric font-bold text-cyan-400">1.0%</span>
-            </div>
-            <div class="flex justify-between border-t border-slate-800 pt-1.5">
-              <span class="text-slate-400">Capacità di Tolleranza Errori:</span>
-              <span id="simTotalErrors" class="font-numeric font-bold text-amber-400 text-sm">4 Errori Consecutivi</span>
-            </div>
+        <!-- Parametri Attuali della Simulazione -->
+        <div class="bg-slate-950 px-5 py-3 border-b border-slate-800/80 grid grid-cols-4 gap-2 text-center text-xs">
+          <div>
+            <div class="text-[10px] text-slate-500 uppercase font-semibold">Cassa</div>
+            <div id="simCassaValue" class="font-numeric font-bold text-emerald-400 text-sm">100,00 €</div>
           </div>
+          <div>
+            <div class="text-[10px] text-slate-500 uppercase font-semibold">Quota Test</div>
+            <div id="simQuotaValue" class="font-numeric font-bold text-amber-300 text-sm">1.60</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-500 uppercase font-semibold">Target Ricavo</div>
+            <div id="simRevenueValue" class="font-numeric font-bold text-cyan-400 text-sm">1.0%</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-500 uppercase font-semibold">Risultato</div>
+            <div id="simTotalErrors" class="font-numeric font-bold text-amber-400 text-sm">4 step</div>
+          </div>
+        </div>
 
-          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Tabella Step Progressivi di Perdita:</h4>
-          <table class="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr class="bg-slate-950 text-slate-400 font-semibold uppercase border-b border-slate-800 text-[10px]">
-                <th class="py-2 px-3 text-center">Step</th>
-                <th class="py-2 px-3 text-center text-cyan-300">Puntata Richiesta</th>
-                <th class="py-2 px-3 text-right text-rose-400">Perdita Cumulativa</th>
-                <th class="py-2 px-3 text-right text-emerald-400">Cassa Rimanente</th>
+        <!-- Tabella della Simulazione -->
+        <div class="flex-1 overflow-y-auto p-4">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+              <tr>
+                <th class="py-2 px-3 text-center">Step Fallimentare</th>
+                <th class="py-2 px-3 text-center">Puntata Richiesta</th>
+                <th class="py-2 px-3 text-right">Perdita Accumulata</th>
+                <th class="py-2 px-3 text-right">Cassa Rimanente</th>
               </tr>
             </thead>
-            <tbody id="simTableBody" class="divide-y divide-slate-800/80">
-              <!-- Riempito via JS -->
+            <tbody id="simTableBody" class="divide-y divide-slate-800/50">
+              <!-- Righe dinamiche simulate -->
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
 
-    <!-- ============================================================== -->
-    <!-- 7. MODALE CONFERMA NUOVA MARTINGALA                            -->
-    <!-- ============================================================== -->
-    <div id="confirmResetModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="bg-slate-900 border border-amber-500/50 rounded-2xl w-full max-w-md p-6 shadow-2xl text-center space-y-4 animate-fadeIn">
-        <div class="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto text-2xl">
-          ⚡
-        </div>
-        <h3 class="text-lg font-bold text-white">Avviare Nuova Martingala?</h3>
-        <p class="text-xs text-slate-300 leading-relaxed">
-          Verrà generato un nuovo codice database univoco e creato un nuovo ciclo attivo in Supabase.<br>
-          La tabella attiva e la perdita accumulata verranno azzerate.<br>
-          <strong class="text-emerald-400">L'Elenco Partite (matches) rimarrà intatto.</strong>
-        </p>
-        <div class="bg-slate-950/80 border border-slate-800 p-3 rounded-xl text-left text-xs space-y-1">
-          <div class="flex justify-between">
-            <span class="text-slate-400">Nuovo Codice Generato:</span>
-            <span id="previewNextCycleCode" class="font-mono font-bold text-cyan-400">MRT-XXXX</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-400">Cassa Iniziale:</span>
-            <span class="font-mono text-emerald-400">100,00 €</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-400">Stato:</span>
-            <span class="font-mono text-emerald-400">Impostato come ATTIVO</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-center gap-3 pt-2">
-          <button id="btnCancelReset" onclick="closeResetModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
-            Annulla
-          </button>
-          <button id="btnConfirmReset" onclick="confirmResetMartingale()" class="px-5 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/30 transition">
-            Sì, Conferma e Crea Ciclo
+        <div class="bg-slate-850 px-5 py-3 border-t border-slate-800 flex justify-end">
+          <button onclick="closeSimulationModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
+            Chiudi
           </button>
         </div>
       </div>
@@ -722,7 +722,7 @@
     <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- ============================================================== -->
-    <!-- JAVASCRIPT VANILLA COMPLETO CON GESTIONE MULTI-CICLO           -->
+    <!-- JAVASCRIPT VANILLA COMPLETO CON GESTIONE SUPABASE CORRETTA     -->
     <!-- ============================================================== -->
     <script>
       // ==============================================================
@@ -756,20 +756,16 @@
             });
             window.supabaseClient = supabaseClient;
             isSupabaseConnected = true;
+            updateConnectionBadge(true, 'Supabase Live');
+            console.log('Client Supabase inizializzato con successo su:', url);
 
-            // Sottoscrizione realtime ai cambiamenti per sincronizzazione multi-dispositivo istantanea
+            // Sottoscrizione realtime per aggiornamenti multi-dispositivo istantanei
             try {
               supabaseClient
                 .channel('martingala-multi-sync')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'config' }, async (payload) => {
-                  if (payload.new && payload.new.code === APP_STATE.config.code) {
-                    APP_STATE.config.cassa = Number(payload.new.cassa !== undefined ? payload.new.cassa : APP_STATE.config.cassa);
-                    APP_STATE.config.targetRevenuePct = Number(payload.new.target_revenue_pct !== undefined ? payload.new.target_revenue_pct : APP_STATE.config.targetRevenuePct);
-                    APP_STATE.config.perditaAccumulata = Number(payload.new.perdita_accumulata !== undefined ? payload.new.perdita_accumulata : APP_STATE.config.perditaAccumulata);
-                    APP_STATE.config.name = payload.new.name || APP_STATE.config.name;
-                    renderAll();
-                  }
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'config' }, async () => {
                   await fetchAllCyclesFromSupabase();
+                  renderAll();
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'history' }, async () => {
                   await fetchHistoryForActiveCycle();
@@ -786,15 +782,17 @@
 
             return supabaseClient;
           } catch (err) {
-            console.warn('Inizializzazione supabaseClient non riuscita:', err);
+            console.error('Inizializzazione supabaseClient non riuscita:', err);
             supabaseClient = null;
             window.supabaseClient = null;
             isSupabaseConnected = false;
+            updateConnectionBadge(false, 'Locale (Cloud Ready)');
           }
         } else {
           supabaseClient = null;
           window.supabaseClient = null;
           isSupabaseConnected = false;
+          updateConnectionBadge(false, 'Locale (Cloud Ready)');
         }
         return null;
       }
@@ -805,14 +803,25 @@
       // ==============================================================
       const APP_STATE = {
         config: {
-          id: 'M1-2026',
-          name: 'Ciclo Principale',
-          code: 'M1-2026',
-          cassa: 100.00,
-          targetRevenuePct: 1.0,
-          perditaAccumulata: 0.00,
+          codice_database: 'M1-2026',
+          nome_martingala: 'Ciclo Principale',
+          cassa_attuale: 100.00,
+          cassa_iniziale: 100.00,
+          percentuale_ricavo: 1.0,
+          perdita_accumulata: 0.00,
           baseQuota: 1.60,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          // Getters e setters per compatibilità
+          get code() { return this.codice_database; },
+          set code(v) { this.codice_database = v; },
+          get name() { return this.nome_martingala; },
+          set name(v) { this.nome_martingala = v; },
+          get cassa() { return this.cassa_attuale; },
+          set cassa(v) { this.cassa_attuale = v; },
+          get targetRevenuePct() { return this.percentuale_ricavo; },
+          set targetRevenuePct(v) { this.percentuale_ricavo = v; },
+          get perditaAccumulata() { return this.perdita_accumulata; },
+          set perditaAccumulata(v) { this.perdita_accumulata = v; }
         },
         // Riga attiva in alto: nulla per default finché non si preme il tasto +
         activeRow: null,
@@ -821,7 +830,7 @@
         // Database elenco partite (mantenuto intatto tra cicli)
         matches: [],
         matchesViewMode: 'table',
-        // Elenco di tutti i cicli di martingala salvati nel database
+        // Elenco di tutti i cicli di martingala salvati nel database Supabase
         allCycles: []
       };
 
@@ -947,8 +956,7 @@
       }
 
       /**
-       * Genera un nuovo Codice Database univoco
-       * (es. 'M2-7A9B' o 'MRT-8K2D' con caratteri alfanumerici casuali maiuscoli)
+       * Genera un nuovo Codice Database univoco (es. 'M2-2026', 'M3-2026' o stringa alfanumerica)
        */
       function generateUniqueDatabaseCode() {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -1039,36 +1047,24 @@
         }
 
         saveBtn.disabled = true;
-        saveBtn.innerHTML = `<span>Salvataggio...</span>`;
+        saveBtn.innerHTML = `<span>Connessione in corso...</span>`;
 
         try {
-          // 1. Salva correttamente nel localStorage
           localStorage.setItem(KEY_STORAGE_URL, newUrl);
           localStorage.setItem(KEY_STORAGE_KEY, newKey);
 
-          // 2. Inizializza immediatamente il client Supabase
-          if (window.supabase && typeof window.supabase.createClient === 'function') {
-            supabaseClient = window.supabase.createClient(newUrl, newKey, {
-              auth: { persistSession: false }
-            });
-            window.supabaseClient = supabaseClient;
+          const client = initSupabase(newUrl, newKey);
+
+          if (client) {
+            showToast('Configurazione salvata! Connesso a Supabase Live.', 'success');
+            closeSettingsModal();
+            await fetchInitialCloudData();
+          } else {
+            showToast('Impossibile inizializzare il client Supabase. Controlla i dati.', 'error');
           }
-
-          // 3. Aggiorna istantaneamente l'indicatore grafico in alto a sinistra a "Supabase Live"
-          isSupabaseConnected = true;
-          updateConnectionBadge(true, 'Supabase Live');
-
-          showToast('Configurazione salvata! Connesso a Supabase Live.', 'success');
-          closeSettingsModal();
-
-          // 4. Sincronizzazione asincrona diretta con le tabelle di Supabase
-          await fetchSupabaseData();
         } catch (err) {
-          console.warn('Avviso sincronizzazione credenziali:', err);
-          isSupabaseConnected = true;
-          updateConnectionBadge(true, 'Supabase Live');
-          showToast('Configurazione salvata. Sincronizzazione Supabase attiva.', 'info');
-          closeSettingsModal();
+          console.error('Errore durante saveSettings:', err);
+          showToast('Errore durante la configurazione: ' + (err.message || err), 'error');
         } finally {
           saveBtn.disabled = false;
           saveBtn.innerHTML = `
@@ -1111,7 +1107,7 @@
         if (icon) {
           setTimeout(() => icon.classList.remove('animate-spin'), 400);
         }
-        showToast('Elenco cicli aggiornato da Supabase', 'success');
+        showToast('Elenco cicli sincronizzato da Supabase', 'success');
       };
 
       // Modale Simulazione Errori Residui
@@ -1125,7 +1121,7 @@
       };
 
       // ==============================================================
-      // 1. LOGICA "NUOVA MARTINGALA" (CREA NUOVO CICLO ATTIVO)
+      // 1. LOGICA "NUOVA MARTINGALA" (VERO INSERT SU SUPABASE)
       // ==============================================================
       window.nuovaMartingala = function() {
         const nextCode = generateUniqueDatabaseCode();
@@ -1138,31 +1134,51 @@
       };
 
       window.confirmResetMartingale = async function() {
-        // 1. Genera nuovo codice database univoco
         const newCode = document.getElementById('previewNextCycleCode').textContent || generateUniqueDatabaseCode();
         const newName = `Ciclo ${newCode}`;
+        const cassa = Number(APP_STATE.config.cassa_iniziale || APP_STATE.config.cassa_attuale || 100.00);
+        const percentuale = Number(APP_STATE.config.percentuale_ricavo || 1.0);
 
-        // 2. Crea il nuovo ciclo attivo
-        const newCycle = {
-          id: newCode,
-          code: newCode,
-          name: newName,
-          cassa: 100.00,
-          targetRevenuePct: 1.0,
-          perditaAccumulata: 0.00,
-          baseQuota: 1.60,
-          created_at: new Date().toISOString(),
-          is_active: true
-        };
+        // 1. Esegui la vera chiamata INSERT su Supabase (nessun upsert/update con id fisso!)
+        if (supabaseClient) {
+          const insertPayload = {
+            codice_database: newCode,
+            nome_martingala: newName,
+            cassa_iniziale: cassa,
+            cassa_attuale: cassa,
+            percentuale_ricavo: percentuale
+          };
 
-        APP_STATE.config = newCycle;
+          console.log('Esecuzione INSERT su tabella config:', insertPayload);
+          const { data, error } = await supabaseClient
+            .from('config')
+            .insert([insertPayload])
+            .select();
+
+          if (error) {
+            console.error('Errore INSERT nuova martingala:', error);
+            showToast('Errore creazione ciclo su Supabase: ' + error.message, 'error');
+          } else {
+            console.log('Nuova martingala inserita nel Table Editor di Supabase:', data);
+            showToast(`Nuova Martingala ${newCode} inserita nel database!`, 'success');
+          }
+        }
+
+        // 2. Imposta questo nuovo codice come attivo sia nel localStorage che nelle variabili globali
+        APP_STATE.config.codice_database = newCode;
+        APP_STATE.config.nome_martingala = newName;
+        APP_STATE.config.cassa_attuale = cassa;
+        APP_STATE.config.cassa_iniziale = cassa;
+        APP_STATE.config.percentuale_ricavo = percentuale;
+        APP_STATE.config.perdita_accumulata = 0.00;
+
         localStorage.setItem(KEY_ACTIVE_CODE, newCode);
 
-        // 3. Svuota la prima riga e lo storico visibile per questo nuovo ciclo
+        // 3. Svuota la vista della tabella Martingala per iniziare il nuovo ciclo
         APP_STATE.activeRow = null;
         APP_STATE.history = [];
 
-        // 4. MANTIENI INTATTO l'Elenco Partite ('matches'): libera solo le partite 'in_gioco'
+        // Manteniamo intatto l'Elenco Partite, reimpostando in_gioco a false se ce ne fossero
         APP_STATE.matches.forEach(m => {
           if (m.in_gioco) {
             m.in_gioco = false;
@@ -1171,13 +1187,11 @@
         });
 
         closeResetModal();
+        saveLocalBackup();
 
-        // 5. Salva il nuovo ciclo come attivo nella tabella 'config' su Supabase
-        await saveNewCycleToSupabase(newCycle);
-
-        // 6. Ricarica e ridisegna tutto
+        // Ricarica la lista completa di tutti i cicli da Supabase (ora ne mostrerà uno in più!)
+        await fetchAllCyclesFromSupabase();
         renderAll();
-        showToast(`Nuovo ciclo avviato con codice ${newCode}!`, 'success');
       };
 
       // ==============================================================
@@ -1186,67 +1200,57 @@
       window.loadMartingaleCycle = async function(cycleCode) {
         if (!cycleCode) return;
 
-        // Imposta come attivo nel localStorage
+        console.log(`Caricamento ciclo ${cycleCode} da Supabase...`);
         localStorage.setItem(KEY_ACTIVE_CODE, cycleCode);
 
-        // Cerca il ciclo nei dati locali o su Supabase
-        let selectedConfig = APP_STATE.allCycles.find(c => c.code === cycleCode);
+        let selected = APP_STATE.allCycles.find(c => (c.codice_database === cycleCode || c.code === cycleCode));
 
         if (supabaseClient) {
-          try {
-            const { data, error } = await supabaseClient
-              .from('config')
-              .select('*')
-              .eq('code', cycleCode)
-              .maybeSingle();
+          const { data, error } = await supabaseClient
+            .from('config')
+            .select('*')
+            .or(`codice_database.eq.${cycleCode},code.eq.${cycleCode}`)
+            .maybeSingle();
 
-            if (!error && data) {
-              selectedConfig = {
-                id: data.id || data.code,
-                code: data.code,
-                name: data.name || `Ciclo ${data.code}`,
-                cassa: Number(data.cassa !== undefined ? data.cassa : 100.00),
-                targetRevenuePct: Number(data.target_revenue_pct !== undefined ? data.target_revenue_pct : 1.0),
-                perditaAccumulata: Number(data.perdita_accumulata !== undefined ? data.perdita_accumulata : 0.00),
-                baseQuota: 1.60,
-                created_at: data.created_at || new Date().toISOString()
-              };
-            }
-          } catch (err) {
-            console.warn('Errore lettura config ciclo:', err);
+          if (error) {
+            console.error('Errore SELECT config for cycle:', error);
+          } else if (data) {
+            selected = {
+              id: data.id,
+              codice_database: data.codice_database || data.code,
+              nome_martingala: data.nome_martingala || data.name || `Ciclo ${cycleCode}`,
+              cassa_attuale: data.cassa_attuale !== undefined ? Number(data.cassa_attuale) : (data.cassa !== undefined ? Number(data.cassa) : 100.00),
+              cassa_iniziale: data.cassa_iniziale !== undefined ? Number(data.cassa_iniziale) : 100.00,
+              percentuale_ricavo: data.percentuale_ricavo !== undefined ? Number(data.percentuale_ricavo) : 1.0,
+              perdita_accumulata: data.perdita_accumulata !== undefined ? Number(data.perdita_accumulata) : 0.00
+            };
           }
         }
 
-        if (selectedConfig) {
-          APP_STATE.config = { ...selectedConfig };
+        if (selected) {
+          APP_STATE.config.codice_database = selected.codice_database || selected.code;
+          APP_STATE.config.nome_martingala = selected.nome_martingala || selected.name;
+          APP_STATE.config.cassa_attuale = selected.cassa_attuale !== undefined ? selected.cassa_attuale : selected.cassa;
+          APP_STATE.config.cassa_iniziale = selected.cassa_iniziale !== undefined ? selected.cassa_iniziale : APP_STATE.config.cassa_attuale;
+          APP_STATE.config.percentuale_ricavo = selected.percentuale_ricavo !== undefined ? selected.percentuale_ricavo : 1.0;
+          APP_STATE.config.perdita_accumulata = selected.perdita_accumulata || 0.00;
         } else {
-          APP_STATE.config.code = cycleCode;
-          APP_STATE.config.name = `Ciclo ${cycleCode}`;
+          APP_STATE.config.codice_database = cycleCode;
+          APP_STATE.config.nome_martingala = `Ciclo ${cycleCode}`;
         }
 
-        // Segna questo ciclo come il più recentemente attivo su Supabase
-        if (supabaseClient) {
-          try {
-            await supabaseClient
-              .from('config')
-              .update({ updated_at: new Date().toISOString() })
-              .eq('code', cycleCode);
-          } catch (e) {
-            console.warn('Errore timestamp ciclo:', e);
-          }
-        }
-
-        // Ricarica la tabella 'history' associata a quel codice specifico da Supabase
+        // Ricarica la tabella 'history' associata a quel codice specifico da Supabase:
+        // SELECT * FROM history WHERE codice_database = ...
         await fetchHistoryForActiveCycle();
 
-        // La prima riga deve essere azzerata e pronta
+        // La prima riga deve essere azzerata e pronta (nuova partita)
         APP_STATE.activeRow = null;
 
         saveLocalBackup();
         closeHistoryModal();
         renderAll();
 
-        showToast(`Ciclo "${APP_STATE.config.name}" (${cycleCode}) caricato con successo!`, 'success');
+        showToast(`Ciclo "${APP_STATE.config.nome_martingala}" (${cycleCode}) caricato con successo!`, 'success');
       };
       window.caricaMartingala = window.loadMartingaleCycle;
 
@@ -1303,17 +1307,18 @@
           id: m.id,
           date: m.date,
           time: m.time,
-          sign: m.sign,
-          probability: Number(m.probability),
           teams: m.teams,
-          competition: m.competition,
-          odds: Number(m.odds)
+          sign: m.sign,
+          probability: m.probability,
+          odds: m.odds,
+          competition: m.competition
         };
 
         syncMatchToSupabase(m);
-        saveLocalBackup();
         closeMatchesModal();
         renderAll();
+        saveLocalBackup();
+
         showToast(`Partita "${m.teams}" inserita nella prima riga e marcata IN GIOCO!`, 'success');
       };
 
@@ -1328,15 +1333,14 @@
         const odds = row.odds;
         const prob = row.probability;
         const valueEdge = calculateValueEdge(odds, prob);
-        const puntata = calculatePuntata(
-          APP_STATE.config.cassa,
-          APP_STATE.config.targetRevenuePct,
-          APP_STATE.config.perditaAccumulata,
-          odds
-        );
+        const cassaAttuale = APP_STATE.config.cassa_attuale;
+        const perditaAcc = APP_STATE.config.perdita_accumulata;
+        const percRicavo = APP_STATE.config.percentuale_ricavo;
 
-        let previousCassa = APP_STATE.config.cassa;
-        let previousPerdita = APP_STATE.config.perditaAccumulata;
+        const puntata = calculatePuntata(cassaAttuale, percRicavo, perditaAcc, odds);
+
+        let previousCassa = cassaAttuale;
+        let previousPerdita = perditaAcc;
         let resultingCassa = previousCassa;
         let resultingPerdita = previousPerdita;
 
@@ -1351,30 +1355,34 @@
           showToast(`PERSA! Puntata: -${formatCurrency(puntata)} | Perdita acc.: ${formatCurrency(resultingPerdita)}`, 'error');
         }
 
+        const activeCode = APP_STATE.config.codice_database;
+
+        // Record per la tabella 'history' con 'codice_database' specificato
         const historyRecord = {
           id: 'hist_' + Date.now(),
-          martingale_code: APP_STATE.config.code,
+          codice_database: activeCode,
+          martingale_code: activeCode,
           date: row.date,
           time: row.time,
           match: row.teams,
           sign: row.sign,
           probability: prob,
           odds: odds,
-          valueEdge: valueEdge,
+          value_edge: valueEdge,
           puntata: puntata,
           outcome: outcome,
           cassa: resultingCassa,
           perdita: resultingPerdita,
           previousSnapshot: {
-            cassa: previousCassa,
-            perdita: previousPerdita,
+            cassa_attuale: previousCassa,
+            perdita_accumulata: previousPerdita,
             activeRow: { ...row }
           },
-          timestamp: new Date().toISOString()
+          created_at: new Date().toISOString()
         };
 
-        APP_STATE.config.cassa = resultingCassa;
-        APP_STATE.config.perditaAccumulata = resultingPerdita;
+        APP_STATE.config.cassa_attuale = resultingCassa;
+        APP_STATE.config.perdita_accumulata = resultingPerdita;
         APP_STATE.history.unshift(historyRecord);
 
         // La partita nell'elenco non è più in gioco
@@ -1387,9 +1395,13 @@
         // La prima riga torna completamente vuota con solo il tasto +
         APP_STATE.activeRow = null;
 
-        await syncConfigToSupabase();
+        // 1. Inserisci il record nella tabella 'history' specificando SEMPRE il 'codice_database' attivo
         await syncHistoryItemToSupabase(historyRecord);
 
+        // 2. Aggiorna la cassa_attuale e perdita_accumulata della Martingala attiva nella tabella 'config'
+        await syncConfigToSupabase();
+
+        saveLocalBackup();
         renderAll();
       };
 
@@ -1401,8 +1413,8 @@
         if (!latest) return;
 
         if (latest.previousSnapshot) {
-          APP_STATE.config.cassa = latest.previousSnapshot.cassa;
-          APP_STATE.config.perditaAccumulata = latest.previousSnapshot.perdita;
+          APP_STATE.config.cassa_attuale = latest.previousSnapshot.cassa_attuale;
+          APP_STATE.config.perdita_accumulata = latest.previousSnapshot.perdita_accumulata;
           APP_STATE.activeRow = latest.previousSnapshot.activeRow;
         }
 
@@ -1416,7 +1428,9 @@
           }
         }
 
-        await deleteHistoryItemFromSupabase(latest.id);
+        if (latest.id) {
+          await deleteHistoryItemFromSupabase(latest.id);
+        }
         await syncConfigToSupabase();
 
         showToast('Esito annullato. Partita ripristinata nella prima riga!', 'info');
@@ -1437,51 +1451,43 @@
       window.copySingleMatchTSV = function(id) {
         const m = APP_STATE.matches.find(item => item.id === id);
         if (!m) return;
-
         const ve = calculateValueEdge(m.odds, m.probability).toFixed(2);
-        const tsv = `${m.date}\t${m.time}\t${m.sign}\t${Number(m.probability).toFixed(1)}%\t${m.teams}\t${m.competition}\t${Number(m.odds).toFixed(2)}\t${ve}%\t${m.in_gioco ? 'IN GIOCO' : 'DISPONIBILE'}`;
-
-        copyToClipboard(tsv, 'Dati partita copiati in formato TSV!');
+        const line = `${m.date}\t${m.time}\t${m.sign}\t${Number(m.probability).toFixed(1)}%\t${m.teams}\t${m.competition}\t${Number(m.odds).toFixed(2)}\t${ve}%\t${m.in_gioco ? 'IN GIOCO' : 'DISPONIBILE'}`;
+        copyToClipboard(line, `Partita "${m.teams}" copiata in TSV!`);
       };
 
+      // Esportazione PDF
       window.exportMartingalePDF = function() {
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-          showToast('Libreria jsPDF non disponibile al momento', 'error');
-          return;
-        }
-
         try {
           const { jsPDF } = window.jspdf;
-          const doc = new jsPDF('landscape');
+          const doc = new jsPDF('l', 'mm', 'a4');
           const today = new Date().toISOString().split('T')[0];
 
           doc.setFontSize(16);
-          doc.setTextColor(30, 41, 59);
-          doc.text(`REPORT MARTINGALA - ${APP_STATE.config.name} (${APP_STATE.config.code})`, 14, 15);
+          doc.text(`Martingala Pro - Report (${APP_STATE.config.nome_martingala} [${APP_STATE.config.codice_database}])`, 14, 15);
 
           doc.setFontSize(10);
-          doc.setTextColor(100, 116, 139);
-          doc.text(`Data Stampa: ${today} | Cassa Attuale: ${formatCurrency(APP_STATE.config.cassa)} | Ricavo Obiettivo: ${APP_STATE.config.targetRevenuePct.toFixed(1)}% | Perdita Accumulata: ${formatCurrency(APP_STATE.config.perditaAccumulata)}`, 14, 22);
+          doc.text(`Data: ${today} | Cassa Attuale: ${formatCurrency(APP_STATE.config.cassa_attuale)} | Target Ricavo: ${APP_STATE.config.percentuale_ricavo.toFixed(1)}% | Perdita Accumulata: ${formatCurrency(APP_STATE.config.perdita_accumulata)}`, 14, 22);
 
-          const headers = [['Data', 'Ora', 'Partita', 'Segno', 'Prob %', 'Quota', 'Value Edge %', 'Puntata', 'Esito', 'Cassa', 'Perdita']];
+          const headers = [["Data", "Ora", "Partita", "Segno", "Prob.", "Quota", "V.Edge", "Puntata", "Esito", "Cassa", "Perdita"]];
           const rows = [];
 
           if (APP_STATE.activeRow && APP_STATE.activeRow.teams) {
             const r = APP_STATE.activeRow;
             const ve = calculateValueEdge(r.odds, r.probability).toFixed(2);
-            const p = calculatePuntata(APP_STATE.config.cassa, APP_STATE.config.targetRevenuePct, APP_STATE.config.perditaAccumulata, r.odds);
+            const p = calculatePuntata(APP_STATE.config.cassa_attuale, APP_STATE.config.percentuale_ricavo, APP_STATE.config.perdita_accumulata, r.odds);
             rows.push([
               r.date,
               r.time,
-              `${r.teams} (In Corso)`,
+              r.teams,
               r.sign,
               `${Number(r.probability).toFixed(1)}%`,
               Number(r.odds).toFixed(2),
               `${ve}%`,
               formatCurrency(p),
-              'ATTIVA',
-              formatCurrency(APP_STATE.config.cassa),
-              formatCurrency(APP_STATE.config.perditaAccumulata)
+              'IN CORSO',
+              formatCurrency(APP_STATE.config.cassa_attuale),
+              formatCurrency(APP_STATE.config.perdita_accumulata)
             ]);
           }
 
@@ -1495,14 +1501,14 @@
               Number(h.odds).toFixed(2),
               `${Number(h.valueEdge).toFixed(2)}%`,
               formatCurrency(h.puntata),
-              h.outcome === 'V' ? 'Vinta' : 'Persa',
+              h.outcome === 'V' ? 'VINTA' : 'PERSA',
               formatCurrency(h.cassa),
               formatCurrency(h.perdita)
             ]);
           });
 
           if (rows.length === 0) {
-            rows.push(['-', '-', 'Nessuna partita attiva o archiviata in questo ciclo', '-', '-', '-', '-', '-', '-', formatCurrency(APP_STATE.config.cassa), '0.00 €']);
+            rows.push(['-', '-', 'Nessuna partita attiva o archiviata in questo ciclo', '-', '-', '-', '-', '-', '-', formatCurrency(APP_STATE.config.cassa_attuale), '0.00 €']);
           }
 
           doc.autoTable({
@@ -1515,7 +1521,7 @@
             alternateRowStyles: { fillColor: [248, 250, 252] }
           });
 
-          const filename = `Martingala ${today}.pdf`;
+          const filename = `Martingala_${APP_STATE.config.codice_database}_${today}.pdf`;
           doc.save(filename);
           showToast(`PDF esportato: ${filename}`, 'success');
         } catch (e) {
@@ -1531,8 +1537,8 @@
         if (APP_STATE.activeRow && APP_STATE.activeRow.teams) {
           const r = APP_STATE.activeRow;
           const ve = calculateValueEdge(r.odds, r.probability).toFixed(2);
-          const p = calculatePuntata(APP_STATE.config.cassa, APP_STATE.config.targetRevenuePct, APP_STATE.config.perditaAccumulata, r.odds);
-          rows.push(`${r.date}\t${r.time}\t${r.teams}\t${r.sign}\t${Number(r.probability).toFixed(1)}%\t${Number(r.odds).toFixed(2)}\t${ve}%\t${p.toFixed(2)}\tIN CORSO\t${APP_STATE.config.cassa.toFixed(2)}\t${APP_STATE.config.perditaAccumulata.toFixed(2)}`);
+          const p = calculatePuntata(APP_STATE.config.cassa_attuale, APP_STATE.config.percentuale_ricavo, APP_STATE.config.perdita_accumulata, r.odds);
+          rows.push(`${r.date}\t${r.time}\t${r.teams}\t${r.sign}\t${Number(r.probability).toFixed(1)}%\t${Number(r.odds).toFixed(2)}\t${ve}%\t${p.toFixed(2)}\tIN CORSO\t${APP_STATE.config.cassa_attuale.toFixed(2)}\t${APP_STATE.config.perdita_accumulata.toFixed(2)}`);
         }
 
         APP_STATE.history.forEach(h => {
@@ -1574,15 +1580,15 @@
         if (!badge) return;
 
         if (online) {
-          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/90 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-950/50 cursor-pointer transition';
+          badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-950/50 cursor-pointer transition';
           badge.innerHTML = `
-            <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)] animate-pulse"></span>
             <span id="supabaseStatusText">${customLabel || 'Supabase Live'}</span>
           `;
         } else {
-          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 cursor-pointer transition';
+          badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700 cursor-pointer transition';
           badge.innerHTML = `
-            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
             <span id="supabaseStatusText">${customLabel || 'Locale (Cloud Ready)'}</span>
           `;
         }
@@ -1590,7 +1596,7 @@
       window.updateConnectionBadge = updateConnectionBadge;
 
       // ==============================================================
-      // PERSISTENZA STATO LOCALE & ASYNC CALLS SUPABASE PROTETTE
+      // PERSISTENZA STATO LOCALE & ASYNC CALLS SUPABASE
       // ==============================================================
       function saveLocalBackup() {
         try {
@@ -1611,7 +1617,18 @@
           const raw = localStorage.getItem(KEY_APP_DATA);
           if (raw) {
             const data = JSON.parse(raw);
-            if (data.config) Object.assign(APP_STATE.config, data.config);
+            if (data.config) {
+              Object.assign(APP_STATE.config, data.config);
+              if (data.config.code && !APP_STATE.config.codice_database) {
+                APP_STATE.config.codice_database = data.config.code;
+              }
+              if (data.config.name && !APP_STATE.config.nome_martingala) {
+                APP_STATE.config.nome_martingala = data.config.name;
+              }
+              if (data.config.cassa !== undefined && APP_STATE.config.cassa_attuale === undefined) {
+                APP_STATE.config.cassa_attuale = data.config.cassa;
+              }
+            }
             if (data.activeRow !== undefined) APP_STATE.activeRow = data.activeRow;
             if (Array.isArray(data.history)) APP_STATE.history = data.history;
             if (Array.isArray(data.allCycles)) APP_STATE.allCycles = data.allCycles;
@@ -1629,55 +1646,46 @@
         return false;
       }
 
-      // Sincronizza la configurazione del ciclo corrente su Supabase
+      // Aggiorna lo stato del ciclo attivo su Supabase
       async function syncConfigToSupabase() {
         saveLocalBackup();
         if (!supabaseClient) return;
 
-        try {
-          const record = {
-            id: APP_STATE.config.code,
-            code: APP_STATE.config.code,
-            name: APP_STATE.config.name,
-            cassa: APP_STATE.config.cassa,
-            target_revenue_pct: APP_STATE.config.targetRevenuePct,
-            perdita_accumulata: APP_STATE.config.perditaAccumulata,
-            updated_at: new Date().toISOString()
+        const activeCode = APP_STATE.config.codice_database;
+        console.log(`UPDATE config per codice_database = '${activeCode}'`);
+
+        const updatePayload = {
+          cassa_attuale: Number(APP_STATE.config.cassa_attuale),
+          cassa: Number(APP_STATE.config.cassa_attuale),
+          nome_martingala: APP_STATE.config.nome_martingala,
+          name: APP_STATE.config.nome_martingala,
+          percentuale_ricavo: Number(APP_STATE.config.percentuale_ricavo),
+          target_revenue_pct: Number(APP_STATE.config.percentuale_ricavo),
+          perdita_accumulata: Number(APP_STATE.config.perdita_accumulata),
+          updated_at: new Date().toISOString()
+        };
+
+        const { error } = await supabaseClient
+          .from('config')
+          .update(updatePayload)
+          .or(`codice_database.eq.${activeCode},code.eq.${activeCode}`);
+
+        if (error) {
+          console.error('Errore UPDATE config su Supabase:', error);
+          // Se non esisteva, tentiamo un insert
+          const insertPayload = {
+            codice_database: activeCode,
+            nome_martingala: APP_STATE.config.nome_martingala,
+            cassa_iniziale: Number(APP_STATE.config.cassa_attuale),
+            cassa_attuale: Number(APP_STATE.config.cassa_attuale),
+            percentuale_ricavo: Number(APP_STATE.config.percentuale_ricavo)
           };
-
-          const { error } = await supabaseClient.from('config').upsert(record);
-
-          if (!error) {
-            isSupabaseConnected = true;
-            updateConnectionBadge(true);
+          const { error: insErr } = await supabaseClient.from('config').insert([insertPayload]);
+          if (insErr) {
+            console.error('Errore INSERT fallback config:', insErr);
           }
-        } catch (err) {
-          console.warn('Supabase config sync non bloccante:', err);
-        }
-      }
-
-      // Salva un nuovo ciclo nella tabella 'config'
-      async function saveNewCycleToSupabase(cycle) {
-        saveLocalBackup();
-        if (!supabaseClient) return;
-
-        try {
-          const record = {
-            id: cycle.code,
-            code: cycle.code,
-            name: cycle.name,
-            cassa: cycle.cassa,
-            target_revenue_pct: cycle.targetRevenuePct,
-            perdita_accumulata: cycle.perditaAccumulata,
-            created_at: cycle.created_at || new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-
-          await supabaseClient.from('config').upsert(record);
-          isSupabaseConnected = true;
-          updateConnectionBadge(true);
-        } catch (err) {
-          console.warn('Supabase new cycle save non bloccante:', err);
+        } else {
+          console.log('Tabella config aggiornata con successo!');
         }
       }
 
@@ -1686,28 +1694,22 @@
         saveLocalBackup();
         if (!supabaseClient) return;
 
-        try {
-          const { error } = await supabaseClient
-            .from('matches')
-            .upsert({
-              id: match.id,
-              date: match.date,
-              time: match.time,
-              sign: match.sign,
-              probability: match.probability,
-              teams: match.teams,
-              competition: match.competition,
-              odds: match.odds,
-              in_gioco: Boolean(match.in_gioco),
-              created_at: new Date().toISOString()
-            });
+        const payload = {
+          id: match.id,
+          date: match.date,
+          time: match.time,
+          sign: match.sign,
+          probability: match.probability,
+          teams: match.teams,
+          competition: match.competition,
+          odds: match.odds,
+          in_gioco: Boolean(match.in_gioco),
+          created_at: match.created_at || new Date().toISOString()
+        };
 
-          if (!error) {
-            isSupabaseConnected = true;
-            updateConnectionBadge(true);
-          }
-        } catch (err) {
-          console.warn('Supabase match sync non bloccante:', err);
+        const { error } = await supabaseClient.from('matches').upsert([payload]);
+        if (error) {
+          console.error('Errore upsert match su Supabase:', error);
         }
       }
 
@@ -1715,10 +1717,9 @@
         saveLocalBackup();
         if (!supabaseClient) return;
 
-        try {
-          await supabaseClient.from('matches').delete().eq('id', id);
-        } catch (err) {
-          console.warn('Supabase delete match err:', err);
+        const { error } = await supabaseClient.from('matches').delete().eq('id', id);
+        if (error) {
+          console.error('Errore delete match su Supabase:', error);
         }
       }
 
@@ -1726,32 +1727,31 @@
         saveLocalBackup();
         if (!supabaseClient) return;
 
-        try {
-          const { error } = await supabaseClient
-            .from('history')
-            .insert({
-              id: item.id,
-              martingale_code: item.martingale_code || APP_STATE.config.code,
-              date: item.date,
-              time: item.time,
-              match: item.match,
-              sign: item.sign,
-              probability: item.probability,
-              odds: item.odds,
-              value_edge: item.valueEdge,
-              puntata: item.puntata,
-              outcome: item.outcome,
-              cassa: item.cassa,
-              perdita: item.perdita,
-              created_at: item.timestamp || new Date().toISOString()
-            });
+        const payload = {
+          id: item.id,
+          codice_database: item.codice_database || APP_STATE.config.codice_database,
+          martingale_code: item.codice_database || APP_STATE.config.codice_database,
+          date: item.date,
+          time: item.time,
+          match: item.match,
+          sign: item.sign,
+          probability: item.probability,
+          odds: item.odds,
+          value_edge: item.valueEdge,
+          puntata: item.puntata,
+          outcome: item.outcome,
+          cassa: item.cassa,
+          perdita: item.perdita,
+          created_at: item.timestamp || new Date().toISOString()
+        };
 
-          if (!error) {
-            isSupabaseConnected = true;
-            updateConnectionBadge(true);
-          }
-        } catch (err) {
-          console.warn('Supabase history sync err:', err);
+        console.log('INSERT history su Supabase:', payload);
+        const { error } = await supabaseClient.from('history').insert([payload]);
+        if (error) {
+          console.error('Errore INSERT history su Supabase:', error);
+          showToast('Errore salvataggio giocata: ' + error.message, 'error');
+        } else {
+          console.log('Giocata inserita con successo nel Table Editor history!');
         }
       }
 
@@ -1759,201 +1759,223 @@
         saveLocalBackup();
         if (!supabaseClient) return;
 
-        try {
-          await supabaseClient.from('history').delete().eq('id', id);
-        } catch (err) {
-          console.warn('Supabase delete history err:', err);
+        const { error } = await supabaseClient.from('history').delete().eq('id', id);
+        if (error) {
+          console.error('Errore delete history su Supabase:', error);
         }
       }
 
-      // Ricarica la tabella history per il ciclo attivo corrente
+      // Ricarica la tabella history per il ciclo attivo: SELECT * FROM history WHERE codice_database = ...
       async function fetchHistoryForActiveCycle() {
         if (!supabaseClient) return;
 
-        try {
-          const { data: historyData, error: historyErr } = await supabaseClient
-            .from('history')
-            .select('*')
-            .eq('martingale_code', APP_STATE.config.code)
-            .order('created_at', { ascending: false });
+        const activeCode = APP_STATE.config.codice_database;
+        console.log(`Esecuzione: SELECT * FROM history WHERE codice_database = '${activeCode}'`);
 
-          if (!historyErr && Array.isArray(historyData)) {
-            APP_STATE.history = historyData.map(h => ({
-              id: h.id,
-              martingale_code: h.martingale_code,
-              date: h.date,
-              time: h.time,
-              match: h.match,
-              sign: h.sign,
-              probability: Number(h.probability),
-              odds: Number(h.odds),
-              valueEdge: Number(h.value_edge),
-              puntata: Number(h.puntata),
-              outcome: h.outcome,
-              cassa: Number(h.cassa),
-              perdita: Number(h.perdita),
-              timestamp: h.created_at
-            }));
-          } else {
-            APP_STATE.history = [];
-          }
-        } catch (e) {
-          console.warn('Errore lettura history ciclo:', e);
+        const { data, error } = await supabaseClient
+          .from('history')
+          .select('*')
+          .or(`codice_database.eq.${activeCode},martingale_code.eq.${activeCode}`)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Errore SELECT * FROM history:', error);
+          showToast('Errore lettura storico da Supabase: ' + error.message, 'error');
+          return;
+        }
+
+        console.log(`Recuperate ${data ? data.length : 0} giocate per il ciclo ${activeCode}`);
+
+        if (Array.isArray(data)) {
+          APP_STATE.history = data.map(h => ({
+            id: h.id,
+            codice_database: h.codice_database || h.martingale_code,
+            martingale_code: h.codice_database || h.martingale_code,
+            date: h.date,
+            time: h.time,
+            match: h.match || h.teams,
+            sign: h.sign,
+            probability: Number(h.probability),
+            odds: Number(h.odds),
+            valueEdge: Number(h.value_edge !== undefined ? h.value_edge : h.valueEdge),
+            puntata: Number(h.puntata),
+            outcome: h.outcome,
+            cassa: Number(h.cassa),
+            perdita: Number(h.perdita),
+            timestamp: h.created_at
+          }));
+        } else {
+          APP_STATE.history = [];
         }
       }
 
-      // Carica tutti i cicli da Supabase (per la modale Elenco Martingala)
-      async function fetchAllCyclesFromSupabase() {
-        if (!supabaseClient) return;
-
-        try {
-          // 1. Leggi tutti i record da 'config'
-          const { data: configsData, error: confErr } = await supabaseClient
-            .from('config')
-            .select('*')
-            .order('updated_at', { ascending: false });
-
-          // 2. Leggi sommario da 'history' per calcolare eventi e cassa
-          const { data: histSummary, error: histErr } = await supabaseClient
-            .from('history')
-            .select('martingale_code, outcome, cassa, created_at');
-
-          if (!confErr && Array.isArray(configsData) && configsData.length > 0) {
-            APP_STATE.allCycles = configsData.map(c => {
-              const code = c.code || c.id;
-              const bets = (histSummary || []).filter(h => h.martingale_code === code);
-              const wins = bets.filter(b => b.outcome === 'V').length;
-              const losses = bets.filter(b => b.outcome === 'P').length;
-
-              return {
-                id: c.id || code,
-                code: code,
-                name: c.name || `Ciclo ${code}`,
-                cassa: Number(c.cassa !== undefined ? c.cassa : 100.00),
-                targetRevenuePct: Number(c.target_revenue_pct !== undefined ? c.target_revenue_pct : 1.0),
-                perditaAccumulata: Number(c.perdita_accumulata !== undefined ? c.perdita_accumulata : 0.00),
-                created_at: c.created_at || c.updated_at || new Date().toISOString(),
-                totalBets: bets.length,
-                wins,
-                losses
-              };
-            });
-          }
-        } catch (err) {
-          console.warn('Errore fetchAllCycles:', err);
-        }
-      }
-
-      // Caricamento partite completo da Supabase
+      // Caricamento partite completo da Supabase: SELECT * FROM matches
       async function fetchMatchesFromSupabase() {
         if (!supabaseClient) return;
 
-        try {
-          const { data: matchesData, error: matchesErr } = await supabaseClient
-            .from('matches')
-            .select('*')
-            .order('date', { ascending: true });
+        console.log('Esecuzione: SELECT * FROM matches');
+        const { data, error } = await supabaseClient
+          .from('matches')
+          .select('*')
+          .order('date', { ascending: true });
 
-          if (!matchesErr && Array.isArray(matchesData)) {
-            if (matchesData.length > 0) {
-              APP_STATE.matches = matchesData.map(m => ({
-                id: m.id || 'm_' + Math.random().toString(36).substr(2, 9),
-                date: m.date || '2026-10-29',
-                time: m.time || '20:45',
-                sign: m.sign || '1',
-                probability: Number(m.probability) || 60,
-                teams: m.teams || m.match || 'Partita',
-                competition: m.competition || 'Campionato',
-                odds: Number(m.odds) || 1.60,
-                in_gioco: Boolean(m.in_gioco)
-              }));
-            } else if (APP_STATE.matches.length > 0) {
-              // Se la tabella su Supabase è vuota, sincronizza il set iniziale
-              for (const m of APP_STATE.matches) {
-                await syncMatchToSupabase(m);
-              }
-            }
+        if (error) {
+          console.error('Errore SELECT * FROM matches:', error);
+          return;
+        }
+
+        console.log(`Caricate ${data ? data.length : 0} partite da Supabase`);
+
+        if (Array.isArray(data) && data.length > 0) {
+          APP_STATE.matches = data.map(m => ({
+            id: m.id || 'm_' + Math.random().toString(36).substr(2, 9),
+            date: m.date || '2026-10-29',
+            time: m.time || '20:45',
+            sign: m.sign || '1',
+            probability: Number(m.probability) || 60,
+            teams: m.teams || m.match || 'Partita',
+            competition: m.competition || 'Campionato',
+            odds: Number(m.odds) || 1.60,
+            in_gioco: Boolean(m.in_gioco)
+          }));
+        } else if (APP_STATE.matches.length > 0) {
+          // Se la tabella su Supabase è vuota, sincronizza il set iniziale
+          console.log('Tabella matches vuota su Supabase: inserimento set iniziale...');
+          for (const m of APP_STATE.matches) {
+            await syncMatchToSupabase(m);
           }
-        } catch (err) {
-          console.warn('Errore lettura matches da Supabase:', err);
         }
       }
       window.fetchMatchesFromSupabase = fetchMatchesFromSupabase;
 
-      // Caricamento sincronizzato istantaneo da Supabase (Cloud Source of Truth)
+      // Carica TUTTE le martingale da Supabase: SELECT * FROM config ORDER BY id DESC
+      async function fetchAllCyclesFromSupabase() {
+        if (!supabaseClient) return;
+
+        console.log('Esecuzione: SELECT * FROM config ORDER BY id DESC');
+        let { data, error } = await supabaseClient
+          .from('config')
+          .select('*')
+          .order('id', { ascending: false });
+
+        if (error) {
+          console.error('Errore SELECT config order by id:', error);
+          const retry = await supabaseClient.from('config').select('*');
+          if (!retry.error) {
+            data = retry.data;
+          } else {
+            console.error('Errore fallback SELECT config:', retry.error);
+            showToast('Errore lettura tabella config: ' + retry.error.message, 'error');
+            return;
+          }
+        }
+
+        console.log(`Trovate ${data ? data.length : 0} Martingale salvate nel database Supabase:`, data);
+
+        const { data: histSummary, error: histErr } = await supabaseClient
+          .from('history')
+          .select('codice_database, martingale_code, outcome, created_at');
+
+        if (histErr) {
+          console.warn('Avviso summary history:', histErr);
+        }
+
+        if (Array.isArray(data) && data.length > 0) {
+          APP_STATE.allCycles = data.map(c => {
+            const code = c.codice_database || c.code || String(c.id);
+            const name = c.nome_martingala || c.name || `Ciclo ${code}`;
+            const cassa = c.cassa_attuale !== undefined ? Number(c.cassa_attuale) : (c.cassa !== undefined ? Number(c.cassa) : 100.00);
+            const perc = c.percentuale_ricavo !== undefined ? Number(c.percentuale_ricavo) : (c.target_revenue_pct !== undefined ? Number(c.target_revenue_pct) : 1.0);
+            const perdita = c.perdita_accumulata !== undefined ? Number(c.perdita_accumulata) : 0.00;
+            const bets = (histSummary || []).filter(h => (h.codice_database === code || h.martingale_code === code));
+            const wins = bets.filter(b => b.outcome === 'V').length;
+            const losses = bets.filter(b => b.outcome === 'P').length;
+
+            return {
+              id: c.id,
+              codice_database: code,
+              code: code,
+              nome_martingala: name,
+              name: name,
+              cassa_attuale: cassa,
+              cassa: cassa,
+              cassa_iniziale: c.cassa_iniziale !== undefined ? Number(c.cassa_iniziale) : cassa,
+              percentuale_ricavo: perc,
+              perdita_accumulata: perdita,
+              created_at: c.created_at || new Date().toISOString(),
+              totalBets: bets.length,
+              wins,
+              losses
+            };
+          });
+        }
+      }
+      window.fetchAllCyclesFromSupabase = fetchAllCyclesFromSupabase;
+
+      // Caricamento sincronizzato istantaneo all'avvio
       async function fetchInitialCloudData() {
-        if (!supabaseClient) {
-          isSupabaseConnected = false;
-          updateConnectionBadge(false, 'Locale (Cloud Ready)');
-          return;
-        }
+        if (!supabaseClient) return;
 
-        try {
-          // 4. INTERROGA SUBITO SUPABASE: query sulla tabella 'config' per recuperare l'ultimo record modificato/attivo
-          let configRecord = null;
-          try {
-            const { data: latestList, error: latestErr } = await supabaseClient
-              .from('config')
-              .select('*')
-              .order('updated_at', { ascending: false })
-              .limit(1);
+        console.log('Interrogazione cloud iniziale su Supabase...');
+        let { data: configsData, error: confErr } = await supabaseClient
+          .from('config')
+          .select('*')
+          .order('id', { ascending: false });
 
-            if (!latestErr && Array.isArray(latestList) && latestList.length > 0) {
-              configRecord = latestList[0];
-            }
-          } catch (e) {
-            console.warn('Query order by updated_at:', e);
-          }
-
-          // Fallback se nessun record con updated_at ordinato
-          if (!configRecord) {
-            const { data: anyList } = await supabaseClient
-              .from('config')
-              .select('*')
-              .limit(1);
-            if (Array.isArray(anyList) && anyList.length > 0) {
-              configRecord = anyList[0];
-            }
-          }
-
-          if (configRecord) {
-            // 5. Imposta automaticamente il 'codice_database' trovato come codice attivo
-            const activeCode = configRecord.code || configRecord.id;
-            APP_STATE.config.id = activeCode;
-            APP_STATE.config.code = activeCode;
-            APP_STATE.config.name = configRecord.name || `Ciclo ${activeCode}`;
-            if (configRecord.cassa !== undefined) APP_STATE.config.cassa = Number(configRecord.cassa);
-            if (configRecord.target_revenue_pct !== undefined) APP_STATE.config.targetRevenuePct = Number(configRecord.target_revenue_pct);
-            if (configRecord.perdita_accumulata !== undefined) APP_STATE.config.perditaAccumulata = Number(configRecord.perdita_accumulata);
-            localStorage.setItem(KEY_ACTIVE_CODE, activeCode);
-          } else {
-            // Se la tabella config non ha ancora questo ciclo, salvalo direttamente su Supabase
-            await syncConfigToSupabase();
-          }
-
-          // 6. CARICA IMMEDIATAMENTE dalla tabella 'history' tutti i record associati a quel 'codice_database'
-          await fetchHistoryForActiveCycle();
-
-          // 7. CARICA la tabella 'matches' (Elenco Partite) completa da Supabase
-          await fetchMatchesFromSupabase();
-
-          // 8. Carica l'elenco di tutti i cicli salvati per la modale
-          await fetchAllCyclesFromSupabase();
-
-          isSupabaseConnected = true;
-          updateConnectionBadge(true, 'Supabase Live');
-          saveLocalBackup();
-          renderAll();
-        } catch (err) {
-          console.warn('Avviso sincronizzazione Supabase:', err);
-          if (supabaseClient) {
-            isSupabaseConnected = true;
-            updateConnectionBadge(true, 'Supabase Live');
-          } else {
-            isSupabaseConnected = false;
-            updateConnectionBadge(false, 'Locale (Cloud Ready)');
+        if (confErr) {
+          console.warn('Avviso order by id su config:', confErr);
+          const retry = await supabaseClient.from('config').select('*');
+          if (!retry.error) {
+            configsData = retry.data;
           }
         }
+
+        let latestRecord = null;
+        if (Array.isArray(configsData) && configsData.length > 0) {
+          latestRecord = configsData[0];
+        }
+
+        if (latestRecord) {
+          const activeCode = latestRecord.codice_database || latestRecord.code || String(latestRecord.id);
+          APP_STATE.config.codice_database = activeCode;
+          APP_STATE.config.nome_martingala = latestRecord.nome_martingala || latestRecord.name || `Ciclo ${activeCode}`;
+          APP_STATE.config.cassa_attuale = latestRecord.cassa_attuale !== undefined ? Number(latestRecord.cassa_attuale) : (latestRecord.cassa !== undefined ? Number(latestRecord.cassa) : 100.00);
+          APP_STATE.config.cassa_iniziale = latestRecord.cassa_iniziale !== undefined ? Number(latestRecord.cassa_iniziale) : APP_STATE.config.cassa_attuale;
+          APP_STATE.config.percentuale_ricavo = latestRecord.percentuale_ricavo !== undefined ? Number(latestRecord.percentuale_ricavo) : 1.0;
+          APP_STATE.config.perdita_accumulata = latestRecord.perdita_accumulata !== undefined ? Number(latestRecord.perdita_accumulata) : 0.00;
+          localStorage.setItem(KEY_ACTIVE_CODE, activeCode);
+          console.log(`Impostato ciclo attivo ${activeCode} da Supabase`);
+        } else {
+          // Tabella config vuota: inserimento del ciclo di base M1-2026
+          console.log('Nessun record in config. Inserimento ciclo iniziale M1-2026...');
+          const initPayload = {
+            codice_database: 'M1-2026',
+            nome_martingala: 'Ciclo Principale',
+            cassa_iniziale: 100.00,
+            cassa_attuale: 100.00,
+            percentuale_ricavo: 1.0
+          };
+          const { data: insData, error: insErr } = await supabaseClient.from('config').insert([initPayload]).select();
+          if (insErr) {
+            console.error('Errore creazione ciclo iniziale:', insErr);
+          } else {
+            console.log('Ciclo iniziale creato con successo:', insData);
+          }
+        }
+
+        // Carica la cronologia del ciclo attivo
+        await fetchHistoryForActiveCycle();
+
+        // Carica l'Elenco Partite completo
+        await fetchMatchesFromSupabase();
+
+        // Carica l'elenco di tutte le Martingale
+        await fetchAllCyclesFromSupabase();
+
+        isSupabaseConnected = true;
+        updateConnectionBadge(true, 'Supabase Live');
+        saveLocalBackup();
+        renderAll();
       }
       window.fetchInitialCloudData = fetchInitialCloudData;
       window.fetchSupabaseData = fetchInitialCloudData;
@@ -1962,13 +1984,13 @@
       // RENDERIZZAZIONE COMPONENTI UI
       // ==============================================================
       function renderHeader() {
-        document.getElementById('headerCassaDisplay').textContent = formatCurrency(APP_STATE.config.cassa);
+        document.getElementById('headerCassaDisplay').textContent = formatCurrency(APP_STATE.config.cassa_attuale);
 
         const currentQuota = APP_STATE.activeRow ? APP_STATE.activeRow.odds : APP_STATE.config.baseQuota;
         const sim = calculateErroriResidui(
-          APP_STATE.config.cassa,
-          APP_STATE.config.perditaAccumulata,
-          APP_STATE.config.targetRevenuePct,
+          APP_STATE.config.cassa_attuale,
+          APP_STATE.config.perdita_accumulata,
+          APP_STATE.config.percentuale_ricavo,
           currentQuota
         );
 
@@ -1978,105 +2000,100 @@
       }
 
       function renderConfigBar() {
-        document.getElementById('inputCassa').value = APP_STATE.config.cassa.toFixed(2);
-        document.getElementById('displayRevenuePct').textContent = APP_STATE.config.targetRevenuePct.toFixed(1) + '%';
-        document.getElementById('inputMartingaleName').value = APP_STATE.config.name;
-        // 1. Codice Database SOLO LETTURA
-        document.getElementById('displayDatabaseCodeBadge').textContent = APP_STATE.config.code;
-        document.getElementById('displayPerditaAccumulata').textContent = formatCurrency(APP_STATE.config.perditaAccumulata);
+        document.getElementById('inputCassa').value = APP_STATE.config.cassa_attuale.toFixed(2);
+        document.getElementById('displayRevenuePct').textContent = APP_STATE.config.percentuale_ricavo.toFixed(1) + '%';
+        document.getElementById('inputMartingaleName').value = APP_STATE.config.nome_martingala;
+        document.getElementById('displayDatabaseCodeBadge').textContent = APP_STATE.config.codice_database;
+        document.getElementById('displayPerditaAccumulata').textContent = formatCurrency(APP_STATE.config.perdita_accumulata);
       }
 
-      // 1. RENDER TABELLA MARTINGALA (Con azzeramento prima riga)
       function renderMartingaleTable() {
         const tbody = document.getElementById('martingaleTableBody');
         tbody.innerHTML = '';
 
-        const row = APP_STATE.activeRow;
+        // -------------------------------------------------------------
+        // RIGA 1 (ATTIVA): Se non c'è partita, mostra trattini e SOLO il tasto + verde
+        // -------------------------------------------------------------
         const trActive = document.createElement('tr');
+        trActive.className = 'border-b border-slate-800 bg-slate-900/40 hover:bg-slate-850/50 transition';
 
-        // Se NESSUNA partita è stata scelta: campi vuoti/nulli e UNICAMENTE il tasto '+' verde
-        if (!row || !row.teams) {
-          trActive.className = 'bg-slate-900/50 border-b border-dashed border-slate-700/60 hover:bg-slate-850/50 transition';
+        if (!APP_STATE.activeRow) {
+          // Stato Neutro Vuoto: TUTTI I CAMPI CON TRATTINO '-' E SOLO IL TASTO '+' ATTIVO
           trActive.innerHTML = `
-            <td class="py-3 px-3 text-slate-500 font-numeric text-center">-</td>
-            <td class="py-3 px-2 text-slate-500 font-numeric text-center">-</td>
+            <td class="py-3 px-3 text-slate-500 font-numeric">-</td>
+            <td class="py-3 px-2 text-center text-slate-500 font-numeric">-</td>
             <td class="py-3 px-3">
-              <div class="flex items-center gap-2 min-w-[220px]">
-                <button onclick="openMatchesModal()" title="Seleziona nuova partita dall'Elenco" class="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center shadow-lg shadow-emerald-950/40 transition active:scale-90 flex-shrink-0">
+              <div class="flex items-center gap-2.5">
+                <button onclick="openMatchesModal()" title="Seleziona partita dall'Elenco Partite" class="w-8 h-8 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold flex items-center justify-center text-base shadow-lg shadow-emerald-950/40 border border-emerald-400/40 transition transform active:scale-90 flex-shrink-0">
                   +
                 </button>
-                <div class="flex-1 bg-slate-950/70 border border-dashed border-slate-700/80 px-3 py-1.5 rounded-lg text-xs text-slate-400 italic">
-                  Seleziona partita premendo "+"
-                </div>
+                <span class="text-slate-400 italic text-xs">
+                  Scegli la nuova partita premendo il tasto "+" verde
+                </span>
               </div>
             </td>
             <td class="py-3 px-2 text-center text-slate-500 font-numeric">-</td>
             <td class="py-3 px-3 text-center text-slate-500 font-numeric">-</td>
             <td class="py-3 px-3 text-center text-slate-500 font-numeric">-</td>
             <td class="py-3 px-3 text-center text-slate-500 font-numeric">-</td>
-            <td class="py-3 px-3 text-center text-slate-500 font-numeric">-</td>
-            <td class="py-3 px-3 text-center text-slate-500 text-xs italic whitespace-nowrap">
-              In attesa partita
-            </td>
-            <td class="py-3 px-3 text-right font-numeric font-semibold text-slate-300">
-              ${formatCurrency(APP_STATE.config.cassa)}
-            </td>
-            <td class="py-3 px-3 text-right font-numeric font-bold text-rose-400">
-              ${formatCurrency(APP_STATE.config.perditaAccumulata)}
-            </td>
+            <td class="py-3 px-3 text-center text-slate-500 font-numeric font-bold">-</td>
+            <td class="py-3 px-3 text-center text-slate-500">-</td>
+            <td class="py-3 px-3 text-right font-numeric text-slate-500">-</td>
+            <td class="py-3 px-3 text-right font-numeric text-slate-500">-</td>
           `;
         } else {
-          // Riga attiva popolata
-          const currentQuota = Number(row.odds) || 1.60;
-          const prob = Number(row.probability) || 65.0;
-          const valueEdge = calculateValueEdge(currentQuota, prob);
+          // Partita selezionata e attiva
+          const r = APP_STATE.activeRow;
+          const odds = r.odds;
+          const prob = r.probability;
+          const valueEdge = calculateValueEdge(odds, prob);
           const puntata = calculatePuntata(
-            APP_STATE.config.cassa,
-            APP_STATE.config.targetRevenuePct,
-            APP_STATE.config.perditaAccumulata,
-            currentQuota
+            APP_STATE.config.cassa_attuale,
+            APP_STATE.config.percentuale_ricavo,
+            APP_STATE.config.perdita_accumulata,
+            odds
           );
 
-          trActive.className = 'bg-slate-900/95 border-b border-emerald-500/40 hover:bg-slate-850/80 transition';
           trActive.innerHTML = `
-            <td class="py-3 px-3 font-numeric text-slate-200 whitespace-nowrap">
-              <span class="inline-block bg-slate-800 text-emerald-300 font-bold px-2 py-0.5 rounded text-[11px] border border-emerald-500/30">
-                ${row.date}
-              </span>
+            <td class="py-3 px-3 whitespace-nowrap font-numeric text-slate-200 font-medium">
+              ${r.date}
             </td>
-            <td class="py-3 px-2 font-numeric text-slate-300 text-center whitespace-nowrap">
-              ${row.time}
+            <td class="py-3 px-2 text-center font-numeric text-slate-400">
+              ${r.time}
             </td>
             <td class="py-3 px-3">
-              <div class="flex items-center gap-1.5 min-w-[220px]">
-                <button onclick="openMatchesModal()" title="Cambia partita" class="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center shadow-md transition active:scale-90 flex-shrink-0">
-                  +
-                </button>
-                <div class="flex-1 bg-slate-950/80 border border-emerald-500/40 px-2.5 py-1.5 rounded-lg text-xs truncate">
-                  <span class="${getProbabilityColorClass(prob)}">${row.teams}</span>
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  <span class="${getProbabilityColorClass(prob)} font-bold text-sm">
+                    ${r.teams}
+                  </span>
+                  <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">
+                    ${r.competition || 'Match'}
+                  </span>
                 </div>
-                <button onclick="removeActiveMatch()" title="Rimuovi partita attiva" class="w-7 h-7 rounded-lg bg-rose-950 hover:bg-rose-900 text-rose-300 font-bold flex items-center justify-center border border-rose-800/40 transition active:scale-90 flex-shrink-0">
+                <button onclick="removeActiveMatch()" title="Rimuovi partita e torna vuota" class="text-slate-400 hover:text-rose-400 text-xs px-1.5 py-0.5 rounded hover:bg-slate-800 transition">
                   ✕
                 </button>
               </div>
             </td>
             <td class="py-3 px-2 text-center">
               <span class="font-numeric font-bold bg-slate-800 text-cyan-300 px-2 py-0.5 rounded border border-slate-700">
-                ${row.sign}
+                ${r.sign}
               </span>
             </td>
-            <td class="py-3 px-3 text-center font-numeric font-semibold ${getProbabilityColorClass(prob)}">
-              ${prob.toFixed(1)}%
+            <td class="py-3 px-3 text-center font-numeric font-bold ${getProbabilityColorClass(prob)}">
+              ${Number(prob).toFixed(1)}%
             </td>
             <td class="py-3 px-3 text-center">
-              <div class="inline-flex items-center gap-1 bg-slate-950 border border-slate-700/80 rounded-lg p-0.5">
-                <button onclick="adjustActiveOdds(-0.01)" title="Diminuisci quota di 0.01" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center text-xs transition">
-                  −
+              <div class="inline-flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-700">
+                <button onclick="adjustActiveOdds(-0.01)" class="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center text-xs">
+                  -
                 </button>
-                <span class="w-12 text-center font-numeric font-bold text-amber-400 text-xs">
-                  ${currentQuota.toFixed(2)}
+                <span class="font-numeric font-bold text-amber-300 px-1 text-xs">
+                  ${Number(odds).toFixed(2)}
                 </span>
-                <button onclick="adjustActiveOdds(0.01)" title="Aumenta quota di 0.01" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center text-xs transition">
+                <button onclick="adjustActiveOdds(0.01)" class="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center text-xs">
                   +
                 </button>
               </div>
@@ -2084,7 +2101,7 @@
             <td class="py-3 px-3 text-center font-numeric font-bold ${valueEdge >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
               ${valueEdge >= 0 ? '+' : ''}${valueEdge.toFixed(2)}%
             </td>
-            <td class="py-3 px-3 text-center font-numeric font-bold text-cyan-300 text-sm">
+            <td class="py-3 px-3 text-center font-numeric font-bold text-cyan-300 text-sm bg-cyan-950/20 rounded-lg">
               ${formatCurrency(puntata)}
             </td>
             <td class="py-3 px-3 text-center whitespace-nowrap">
@@ -2097,35 +2114,41 @@
                 </button>
               </div>
             </td>
-            <td class="py-3 px-3 text-right font-numeric font-semibold text-slate-300">
-              ${formatCurrency(APP_STATE.config.cassa)}
+            <td class="py-3 px-3 text-right font-numeric font-bold text-emerald-400">
+              ${formatCurrency(APP_STATE.config.cassa_attuale)}
             </td>
-            <td class="py-3 px-3 text-right font-numeric font-bold text-rose-400">
-              ${formatCurrency(APP_STATE.config.perditaAccumulata)}
+            <td class="py-3 px-3 text-right font-numeric font-bold ${APP_STATE.config.perdita_accumulata > 0 ? 'text-rose-400' : 'text-slate-400'}">
+              ${formatCurrency(APP_STATE.config.perdita_accumulata)}
             </td>
           `;
         }
 
         tbody.appendChild(trActive);
 
-        // RIGHE CONGELATE STORICHE
+        // -------------------------------------------------------------
+        // RIGHE CRONOLOGIA (CONGELATE SOTTO)
+        // -------------------------------------------------------------
         APP_STATE.history.forEach((item, index) => {
-          const isLatestHistory = index === 0;
+          const isLatestHistory = (index === 0);
           const trHistory = document.createElement('tr');
-          trHistory.className = 'bg-slate-950/60 hover:bg-slate-900/60 transition border-b border-slate-800/60 opacity-90';
+          trHistory.className = `border-b border-slate-800/60 hover:bg-slate-850/40 transition ${
+            item.outcome === 'V' ? 'bg-emerald-950/10' : 'bg-rose-950/10'
+          }`;
 
           trHistory.innerHTML = `
-            <td class="py-2.5 px-3 font-numeric text-slate-400 whitespace-nowrap">
+            <td class="py-2.5 px-3 whitespace-nowrap font-numeric text-slate-400">
               ${item.date}
             </td>
-            <td class="py-2.5 px-2 font-numeric text-slate-400 text-center whitespace-nowrap">
+            <td class="py-2.5 px-2 text-center font-numeric text-slate-500">
               ${item.time}
             </td>
             <td class="py-2.5 px-3">
-              <span class="${getProbabilityColorClass(item.probability)}">${item.match}</span>
+              <span class="text-slate-300 font-medium">
+                ${item.match}
+              </span>
             </td>
             <td class="py-2.5 px-2 text-center">
-              <span class="font-numeric text-slate-300 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">
+              <span class="font-numeric font-semibold text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded text-[11px] border border-slate-700">
                 ${item.sign}
               </span>
             </td>
@@ -2144,8 +2167,8 @@
             <td class="py-2.5 px-3 text-center whitespace-nowrap">
               <div class="inline-flex items-center gap-1.5">
                 <span class="px-2 py-0.5 rounded text-xs font-bold ${
-                  item.outcome === 'V'
-                    ? 'bg-emerald-600 text-white shadow shadow-emerald-950'
+                  item.outcome === 'V' 
+                    ? 'bg-emerald-600 text-white shadow shadow-emerald-950' 
                     : 'bg-rose-600 text-white shadow shadow-rose-950'
                 }">
                   ${item.outcome === 'V' ? 'Vinta' : 'Persa'}
@@ -2178,25 +2201,13 @@
         const badge = document.getElementById('cyclesCountBadge');
         if (!container) return;
 
-        // Se l'elenco dei cicli è vuoto, assicurati almeno che il ciclo attivo sia presente
         let list = [...APP_STATE.allCycles];
-        if (list.length === 0) {
-          list = [{
-            code: APP_STATE.config.code,
-            name: APP_STATE.config.name,
-            cassa: APP_STATE.config.cassa,
-            targetRevenuePct: APP_STATE.config.targetRevenuePct,
-            created_at: APP_STATE.config.created_at || new Date().toISOString(),
-            totalBets: APP_STATE.history.length,
-            wins: APP_STATE.history.filter(h => h.outcome === 'V').length,
-            losses: APP_STATE.history.filter(h => h.outcome === 'P').length
-          }];
-        }
 
         if (filterQuery) {
+          const q = filterQuery.toLowerCase();
           list = list.filter(c => 
-            (c.name && c.name.toLowerCase().includes(filterQuery)) ||
-            (c.code && c.code.toLowerCase().includes(filterQuery))
+            (c.nome_martingala && c.nome_martingala.toLowerCase().includes(q)) ||
+            (c.codice_database && c.codice_database.toLowerCase().includes(q))
           );
         }
 
@@ -2209,18 +2220,16 @@
         if (list.length === 0) {
           container.innerHTML = `
             <div class="text-center py-12 text-slate-500 text-sm">
-              Nessun ciclo trovato con il filtro specificato.
+              Nessuna Martingala trovata nel database Supabase. Clicca su "+ Nuova Martingala" per crearne una!
             </div>
           `;
           return;
         }
 
+        // Cicla su TUTTI i record restituiti da Supabase e genera una card HTML per CIASCUNA Martingala trovata
         list.forEach(c => {
-          const isActive = (c.code === APP_STATE.config.code);
+          const isActive = (c.codice_database === APP_STATE.config.codice_database);
           const dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
-          const betsCount = c.totalBets !== undefined ? c.totalBets : 0;
-          const wins = c.wins || 0;
-          const losses = c.losses || 0;
 
           const card = document.createElement('div');
           card.className = `p-4 sm:p-5 rounded-2xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
@@ -2232,9 +2241,9 @@
           card.innerHTML = `
             <div class="space-y-2 flex-1">
               <div class="flex items-center gap-2.5 flex-wrap">
-                <h4 class="text-base font-bold text-white tracking-tight">${c.name}</h4>
+                <h4 class="text-base font-bold text-white tracking-tight">${c.nome_martingala}</h4>
                 <span class="px-2.5 py-0.5 rounded-lg bg-slate-950 text-amber-300 font-mono font-bold text-xs border border-slate-700/80 shadow-inner">
-                  ${c.code}
+                  ${c.codice_database}
                 </span>
                 ${isActive ? `
                   <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-500/40">
@@ -2247,21 +2256,25 @@
               <!-- Informazioni Sintetiche -->
               <div class="flex items-center gap-4 sm:gap-6 text-xs text-slate-400 flex-wrap">
                 <div class="flex items-center gap-1.5">
-                  <span class="text-slate-500">Creato:</span>
+                  <span class="text-slate-500">Cassa Attuale:</span>
+                  <span class="font-numeric font-bold text-emerald-400">${formatCurrency(c.cassa_attuale)}</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-slate-500">Target Ricavo:</span>
+                  <span class="font-numeric text-cyan-300 font-semibold">${Number(c.percentuale_ricavo).toFixed(1)}%</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-slate-500">Data:</span>
                   <span class="font-numeric text-slate-300">${dateStr}</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  <span class="text-slate-500">Cassa:</span>
-                  <span class="font-numeric font-bold text-emerald-400">${formatCurrency(c.cassa)}</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <span class="text-slate-500">Eventi Giocati:</span>
-                  <span class="font-numeric text-cyan-300 font-semibold">${betsCount} giocate ${betsCount > 0 ? `(${wins}V - ${losses}P)` : ''}</span>
+                  <span class="text-slate-500">Giocate:</span>
+                  <span class="font-numeric text-slate-300">${c.totalBets || 0} (${c.wins || 0}V - ${c.losses || 0}P)</span>
                 </div>
               </div>
             </div>
 
-            <!-- Pulsante Blu Carica ➔ -->
+            <!-- Pulsante Carica -->
             <div class="flex items-center justify-end sm:justify-center flex-shrink-0">
               ${isActive ? `
                 <button disabled class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-emerald-400 border border-emerald-500/30 cursor-default flex items-center gap-1.5 shadow-inner">
@@ -2271,7 +2284,7 @@
                   <span>In Uso</span>
                 </button>
               ` : `
-                <button onclick="loadMartingaleCycle('${c.code}')" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white shadow-lg shadow-blue-950/40 border border-blue-400/30 transition flex items-center gap-2 transform active:scale-95">
+                <button onclick="caricaMartingala('${c.codice_database}')" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white shadow-lg shadow-blue-950/40 border border-blue-400/30 transition flex items-center gap-2 transform active:scale-95">
                   <span>Carica</span>
                   <span class="text-sm leading-none">➔</span>
                 </button>
@@ -2284,12 +2297,28 @@
       }
 
       function renderMatchesModal() {
-        document.getElementById('modalMatchesBadge').textContent = `${APP_STATE.matches.length} partite`;
-
         const tbody = document.getElementById('matchesTableBody');
+        const badge = document.getElementById('modalMatchesBadge');
+        if (!tbody) return;
+
+        if (badge) {
+          badge.textContent = `${APP_STATE.matches.length} partite`;
+        }
+
         tbody.innerHTML = '';
 
-        APP_STATE.matches.forEach((m) => {
+        if (APP_STATE.matches.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="9" class="text-center py-8 text-slate-500">
+                Nessuna partita memorizzata nel database 'matches'. Clicca su "+ Nuova Partita" per aggiungerne una.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        APP_STATE.matches.forEach(m => {
           const valueEdge = calculateValueEdge(m.odds, m.probability);
           const tr = document.createElement('tr');
           tr.className = `border-b border-slate-800/80 hover:bg-slate-850/60 transition ${m.in_gioco ? 'bg-red-950/20' : ''}`;
@@ -2315,7 +2344,7 @@
               ${Number(m.probability).toFixed(1)}%
             </td>
             <td class="py-3 px-4">
-              <span class="${getProbabilityColorClass(m.probability)}">
+              <span class="${getProbabilityColorClass(m.probability)} font-medium">
                 ${m.teams}
               </span>
             </td>
@@ -2371,15 +2400,15 @@
       function renderSimulationModal() {
         const currentQuota = APP_STATE.activeRow ? APP_STATE.activeRow.odds : APP_STATE.config.baseQuota;
         const sim = calculateErroriResidui(
-          APP_STATE.config.cassa,
-          APP_STATE.config.perditaAccumulata,
-          APP_STATE.config.targetRevenuePct,
+          APP_STATE.config.cassa_attuale,
+          APP_STATE.config.perdita_accumulata,
+          APP_STATE.config.percentuale_ricavo,
           currentQuota
         );
 
-        document.getElementById('simCassaValue').textContent = formatCurrency(APP_STATE.config.cassa);
+        document.getElementById('simCassaValue').textContent = formatCurrency(APP_STATE.config.cassa_attuale);
         document.getElementById('simQuotaValue').textContent = Number(currentQuota).toFixed(2);
-        document.getElementById('simRevenueValue').textContent = APP_STATE.config.targetRevenuePct.toFixed(1) + '%';
+        document.getElementById('simRevenueValue').textContent = APP_STATE.config.percentuale_ricavo.toFixed(1) + '%';
         document.getElementById('simTotalErrors').textContent = `${sim.steps} Errori Consecutivi Tollerati`;
 
         const tbody = document.getElementById('simTableBody');
@@ -2420,7 +2449,7 @@
       // EVENT LISTENERS AUSILIARI
       // ==============================================================
       window.addEventListener('DOMContentLoaded', async () => {
-        // 1. Carica cache locale
+        // 1. Carica la cache locale iniziale per rendering istantaneo
         loadLocalBackup();
         renderAll();
 
@@ -2428,8 +2457,6 @@
         let savedUrl = localStorage.getItem(KEY_STORAGE_URL);
         let savedKey = localStorage.getItem(KEY_STORAGE_KEY);
 
-        // Se mancano (es. nuovo dispositivo smartphone o PC), usa e salva automaticamente
-        // le credenziali predefinite garantendo la sincronizzazione immediata tra dispositivi!
         if (!savedUrl || !savedKey) {
           savedUrl = DEFAULT_SUPABASE_URL;
           savedKey = DEFAULT_SUPABASE_KEY;
@@ -2437,14 +2464,16 @@
           localStorage.setItem(KEY_STORAGE_KEY, savedKey);
         }
 
-        // Inizializza client Supabase e imposta istantaneamente l'indicatore verde "Supabase Live"
-        initSupabase(savedUrl, savedKey);
-        isSupabaseConnected = true;
-        updateConnectionBadge(true, 'Supabase Live');
+        // Inizializza client Supabase
+        const client = initSupabase(savedUrl, savedKey);
 
-        // 3. INTERROGA SUBITO SUPABASE: carica l'ultimo ciclo attivo, la relativa history e matches
-        if (supabaseClient) {
+        // Mostra "Supabase Live" in alto a sinistra SOLO SE supabaseClient è stato inizializzato con successo
+        if (client) {
+          updateConnectionBadge(true, 'Supabase Live');
           await fetchInitialCloudData();
+        } else {
+          updateConnectionBadge(false, 'Locale (Cloud Ready)');
+          openSettingsModal();
         }
 
         // 4. Toggle e form eventi
@@ -2585,13 +2614,13 @@
         });
 
         document.getElementById('btnCassaMinus').addEventListener('click', async () => {
-          APP_STATE.config.cassa = Math.max(1, Math.round((APP_STATE.config.cassa - 10) * 100) / 100);
+          APP_STATE.config.cassa_attuale = Math.max(1, Math.round((APP_STATE.config.cassa_attuale - 10) * 100) / 100);
           await syncConfigToSupabase();
           renderAll();
         });
 
         document.getElementById('btnCassaPlus').addEventListener('click', async () => {
-          APP_STATE.config.cassa = Math.round((APP_STATE.config.cassa + 10) * 100) / 100;
+          APP_STATE.config.cassa_attuale = Math.round((APP_STATE.config.cassa_attuale + 10) * 100) / 100;
           await syncConfigToSupabase();
           renderAll();
         });
@@ -2599,29 +2628,28 @@
         document.getElementById('inputCassa').addEventListener('change', async (e) => {
           const val = parseFloat(e.target.value);
           if (!isNaN(val) && val > 0) {
-            APP_STATE.config.cassa = Math.round(val * 100) / 100;
+            APP_STATE.config.cassa_attuale = Math.round(val * 100) / 100;
             await syncConfigToSupabase();
             renderAll();
           }
         });
 
         document.getElementById('btnRevenueMinus').addEventListener('click', async () => {
-          APP_STATE.config.targetRevenuePct = Math.max(0.1, Math.round((APP_STATE.config.targetRevenuePct - 0.1) * 10) / 10);
+          APP_STATE.config.percentuale_ricavo = Math.max(0.1, Math.round((APP_STATE.config.percentuale_ricavo - 0.1) * 10) / 10);
           await syncConfigToSupabase();
           renderAll();
         });
 
         document.getElementById('btnRevenuePlus').addEventListener('click', async () => {
-          APP_STATE.config.targetRevenuePct = Math.round((APP_STATE.config.targetRevenuePct + 0.1) * 10) / 10;
+          APP_STATE.config.percentuale_ricavo = Math.round((APP_STATE.config.percentuale_ricavo + 0.1) * 10) / 10;
           await syncConfigToSupabase();
           renderAll();
         });
 
-        // 1. Nome Martingala liberamente editabile e salvabile
         document.getElementById('inputMartingaleName').addEventListener('change', async (e) => {
-          APP_STATE.config.name = e.target.value.trim() || `Ciclo ${APP_STATE.config.code}`;
+          APP_STATE.config.nome_martingala = e.target.value.trim() || `Ciclo ${APP_STATE.config.codice_database}`;
           await syncConfigToSupabase();
-          showToast('Nome Martingala aggiornato', 'success');
+          showToast('Nome Martingala aggiornato nel database', 'success');
         });
       });
 
